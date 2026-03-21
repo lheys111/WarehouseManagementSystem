@@ -2,9 +2,9 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
-using static System.Collections.Specialized.BitVector32;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormShipmentHistory : Form
@@ -14,6 +14,7 @@ namespace WarehouseManagementSystem.Forms
         public FormShipmentHistory(bool forStorekeeper = false)
         {
             InitializeComponent();
+            this.btnViewDetails.Click += new EventHandler(this.btnViewDetails_Click);
             isStorekeeper = forStorekeeper;
             LoadShipments();
         }
@@ -22,21 +23,21 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                string query = @"SELECT Id, ShipmentNumber, ShipmentDate, StorekeeperName, 
-                                        ItemsCount, TotalSum
-                                FROM vw_ShipmentsHistory";
+                string sql = @"SELECT Id, ShipmentNumber, ShipmentDate, StorekeeperName, 
+                                      ItemsCount, TotalSum
+                              FROM vw_ShipmentsHistory";
 
                 if (isStorekeeper)
                 {
-                    query += " WHERE StorekeeperName = @Storekeeper";
+                    sql += " WHERE StorekeeperName = @Storekeeper";
                     NpgsqlParameter[] parameters = { new NpgsqlParameter("@Storekeeper", Session.CurrentUser.FullName) };
-                    DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
-                    dgvShipments.DataSource = dt;
+                    DataTable data = DatabaseHelper.ExecuteQuery(sql, parameters);
+                    dgvShipments.DataSource = data;
                 }
                 else
                 {
-                    DataTable dt = DatabaseHelper.ExecuteQuery(query);
-                    dgvShipments.DataSource = dt;
+                    DataTable data = DatabaseHelper.ExecuteQuery(sql);
+                    dgvShipments.DataSource = data;
                 }
 
                 if (dgvShipments.Columns.Contains("Id"))
@@ -75,7 +76,5 @@ namespace WarehouseManagementSystem.Forms
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
-       
     }
 }

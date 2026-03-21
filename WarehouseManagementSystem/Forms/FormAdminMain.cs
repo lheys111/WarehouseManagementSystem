@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormAdminMain : Form
@@ -12,6 +13,10 @@ namespace WarehouseManagementSystem.Forms
         public FormAdminMain()
         {
             InitializeComponent();
+            this.btnExit.Click += new EventHandler(this.btnExit_Click);
+            this.товарыToolStripMenuItem.Click += new EventHandler(this.товарыToolStripMenuItem_Click);
+            this.категорииToolStripMenuItem.Click += new EventHandler(this.категорииToolStripMenuItem_Click);
+            this.историяОтгрузокToolStripMenuItem.Click += new EventHandler(this.историяОтгрузокToolStripMenuItem_Click);
         }
 
         private void FormAdminMain_Load(object sender, EventArgs e)
@@ -19,14 +24,12 @@ namespace WarehouseManagementSystem.Forms
             this.Text = "Складская система - Администратор";
             this.WindowState = FormWindowState.Maximized;
 
-            // Настройка кнопки ВЫХОД
             btnExit.FlatStyle = FlatStyle.Flat;
             btnExit.FlatAppearance.BorderColor = Color.Black;
             btnExit.FlatAppearance.BorderSize = 1;
             btnExit.BackColor = Color.White;
             btnExit.Text = "ВЫХОД";
 
-            // Настройка MenuStrip
             menuStrip.BackColor = SystemColors.Control;
         }
 
@@ -47,21 +50,18 @@ namespace WarehouseManagementSystem.Forms
             childForm.Show();
         }
 
-        // Справочники -> Товары
         private void товарыToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormProducts productsForm = new FormProducts();
             OpenChildForm(productsForm);
         }
 
-        // Справочники -> Категории
         private void категорииToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormCategories categoriesForm = new FormCategories();
             OpenChildForm(categoriesForm);
         }
 
-        // Администрирование -> История отгрузок
         private void историяОтгрузокToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormShipmentHistory historyForm = new FormShipmentHistory();

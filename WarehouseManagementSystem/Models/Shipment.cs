@@ -14,8 +14,6 @@ namespace WarehouseManagementSystem.Models
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<ShipmentItem> Items { get; set; } = new List<ShipmentItem>();
-
-        // Вычисляемые поля
         public int ItemsCount => Items.Count;
         public decimal TotalSum => Items.Sum(i => i.Quantity * i.PriceAtShipment);
     }

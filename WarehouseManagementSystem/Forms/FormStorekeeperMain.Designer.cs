@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.btnExit = new System.Windows.Forms.Button();
-            this.panelContent = new System.Windows.Forms.Panel();
             this.складToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.остаткиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.документыToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.отгрузкиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.новаяОтгрузкаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnExit = new System.Windows.Forms.Button();
+            this.panelContent = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.menuStrip.SuspendLayout();
             this.panelContent.SuspendLayout();
@@ -50,29 +50,9 @@
             this.документыToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(583, 28);
+            this.menuStrip.Size = new System.Drawing.Size(667, 28);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip1";
-            // 
-            // btnExit
-            // 
-            this.btnExit.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Location = new System.Drawing.Point(508, 1);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(75, 23);
-            this.btnExit.TabIndex = 1;
-            this.btnExit.Text = "ВЫХОД";
-            this.btnExit.UseVisualStyleBackColor = false;
-            // 
-            // panelContent
-            // 
-            this.panelContent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.panelContent.Controls.Add(this.label1);
-            this.panelContent.Location = new System.Drawing.Point(12, 68);
-            this.panelContent.Name = "panelContent";
-            this.panelContent.Size = new System.Drawing.Size(559, 375);
-            this.panelContent.TabIndex = 2;
             // 
             // складToolStripMenuItem
             // 
@@ -85,7 +65,7 @@
             // остаткиToolStripMenuItem
             // 
             this.остаткиToolStripMenuItem.Name = "остаткиToolStripMenuItem";
-            this.остаткиToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.остаткиToolStripMenuItem.Size = new System.Drawing.Size(146, 26);
             this.остаткиToolStripMenuItem.Text = "Остатки";
             // 
             // документыToolStripMenuItem
@@ -100,14 +80,34 @@
             // отгрузкиToolStripMenuItem
             // 
             this.отгрузкиToolStripMenuItem.Name = "отгрузкиToolStripMenuItem";
-            this.отгрузкиToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.отгрузкиToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.отгрузкиToolStripMenuItem.Text = "Отгрузки";
             // 
             // новаяОтгрузкаToolStripMenuItem
             // 
             this.новаяОтгрузкаToolStripMenuItem.Name = "новаяОтгрузкаToolStripMenuItem";
-            this.новаяОтгрузкаToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.новаяОтгрузкаToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.новаяОтгрузкаToolStripMenuItem.Text = "Новая отгрузка";
+            // 
+            // btnExit
+            // 
+            this.btnExit.BackColor = System.Drawing.Color.MediumAquamarine;
+            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExit.Location = new System.Drawing.Point(592, 0);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(75, 23);
+            this.btnExit.TabIndex = 1;
+            this.btnExit.Text = "ВЫХОД";
+            this.btnExit.UseVisualStyleBackColor = false;
+            // 
+            // panelContent
+            // 
+            this.panelContent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.panelContent.Controls.Add(this.label1);
+            this.panelContent.Location = new System.Drawing.Point(12, 68);
+            this.panelContent.Name = "panelContent";
+            this.panelContent.Size = new System.Drawing.Size(643, 375);
+            this.panelContent.TabIndex = 2;
             // 
             // label1
             // 
@@ -122,13 +122,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(583, 450);
+            this.ClientSize = new System.Drawing.Size(667, 450);
             this.Controls.Add(this.panelContent);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.Name = "FormStorekeeperMain";
-            this.Text = "FormStorekeeperMain";
             this.Load += new System.EventHandler(this.FormStorekeeperMain_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();

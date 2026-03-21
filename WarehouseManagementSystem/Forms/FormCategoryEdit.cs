@@ -12,6 +12,8 @@ namespace WarehouseManagementSystem.Forms
         public FormCategoryEdit()
         {
             InitializeComponent();
+            this.btnSave.Click += new EventHandler(this.btnSave_Click);
+            this.btnCancel.Click += new EventHandler(this.btnCancel_Click);
             this.Text = "Добавление категории";
         }
 
@@ -37,22 +39,22 @@ namespace WarehouseManagementSystem.Forms
             {
                 if (categoryId == -1)
                 {
-                    string query = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
+                    string sql = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
                     NpgsqlParameter[] parameters = {
                         new NpgsqlParameter("@Name", txtName.Text),
                         new NpgsqlParameter("@Description", string.IsNullOrEmpty(txtDescription.Text) ? (object)DBNull.Value : txtDescription.Text)
                     };
-                    DatabaseHelper.ExecuteNonQuery(query, parameters);
+                    DatabaseHelper.ExecuteNonQuery(sql, parameters);
                 }
                 else
                 {
-                    string query = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
+                    string sql = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
                     NpgsqlParameter[] parameters = {
                         new NpgsqlParameter("@Name", txtName.Text),
                         new NpgsqlParameter("@Description", string.IsNullOrEmpty(txtDescription.Text) ? (object)DBNull.Value : txtDescription.Text),
                         new NpgsqlParameter("@Id", categoryId)
                     };
-                    DatabaseHelper.ExecuteNonQuery(query, parameters);
+                    DatabaseHelper.ExecuteNonQuery(sql, parameters);
                 }
 
                 this.DialogResult = DialogResult.OK;

@@ -3,6 +3,7 @@ using System.Data;
 using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormShipmentDetails : Form
@@ -12,6 +13,7 @@ namespace WarehouseManagementSystem.Forms
         public FormShipmentDetails(int id, string number)
         {
             InitializeComponent();
+            this.btnClose.Click += new EventHandler(this.btnClose_Click);
             shipmentId = id;
             this.Text = $"Отгрузка {number}";
             LoadDetails();
@@ -21,12 +23,11 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                // Информация об отгрузке
-                string infoQuery = @"SELECT s.ShipmentNumber, s.ShipmentDate, u.FullName, s.Status
-                                    FROM Shipments s
-                                    JOIN Users u ON s.StorekeeperId = u.Id
-                                    WHERE s.Id = @Id";
-                DataTable info = DatabaseHelper.ExecuteQuery(infoQuery, new[] { new NpgsqlParameter("@Id", shipmentId) });
+                string infoSql = @"SELECT s.ShipmentNumber, s.ShipmentDate, u.FullName, s.Status
+                                  FROM Shipments s
+                                  JOIN Users u ON s.StorekeeperId = u.Id
+                                  WHERE s.Id = @Id";
+                DataTable info = DatabaseHelper.ExecuteQuery(infoSql, new[] { new NpgsqlParameter("@Id", shipmentId) });
 
                 if (info.Rows.Count > 0)
                 {
@@ -35,12 +36,11 @@ namespace WarehouseManagementSystem.Forms
                     lblStatus.Text = $"Статус: {info.Rows[0]["Status"]}";
                 }
 
-                // Детали отгрузки
-                string detailsQuery = @"SELECT p.Article, p.Name, sd.Quantity, sd.PriceAtShipment
-                                       FROM ShipmentDetails sd
-                                       JOIN Products p ON sd.ProductId = p.Id
-                                       WHERE sd.ShipmentId = @Id";
-                DataTable details = DatabaseHelper.ExecuteQuery(detailsQuery, new[] { new NpgsqlParameter("@Id", shipmentId) });
+                string detailsSql = @"SELECT p.Article, p.Name, sd.Quantity, sd.PriceAtShipment
+                                     FROM ShipmentDetails sd
+                                     JOIN Products p ON sd.ProductId = p.Id
+                                     WHERE sd.ShipmentId = @Id";
+                DataTable details = DatabaseHelper.ExecuteQuery(detailsSql, new[] { new NpgsqlParameter("@Id", shipmentId) });
                 dgvDetails.DataSource = details;
 
                 if (dgvDetails.Columns.Contains("Article"))
@@ -52,7 +52,6 @@ namespace WarehouseManagementSystem.Forms
                 if (dgvDetails.Columns.Contains("PriceAtShipment"))
                     dgvDetails.Columns["PriceAtShipment"].HeaderText = "Цена";
 
-                // Итого
                 int totalItems = details.Rows.Count;
                 decimal totalSum = 0;
                 foreach (DataRow row in details.Rows)

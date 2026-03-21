@@ -13,6 +13,6 @@ namespace WarehouseManagementSystem.Models
         public decimal PurchasePrice { get; set; }
         public int? ShelfLife { get; set; }
         public DateTime CreatedAt { get; set; }
-        public decimal StockQuantity { get; set; } // Только для отображения, не хранится в Products
+        public decimal StockQuantity { get; set; } 
     }
 }

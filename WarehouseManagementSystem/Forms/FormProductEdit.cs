@@ -3,6 +3,7 @@ using System.Data;
 using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormProductEdit : Form
@@ -10,15 +11,15 @@ namespace WarehouseManagementSystem.Forms
         private int productId = -1;
         private bool isEdit = false;
 
-        // Конструктор для добавления нового товара
         public FormProductEdit()
         {
             InitializeComponent();
             this.Text = "Добавление товара";
+            this.btnSave.Click += new EventHandler(this.btnSave_Click);
+            this.btnCancel.Click += new EventHandler(this.btnCancel_Click);
             LoadCategories();
         }
 
-        // Конструктор для редактирования существующего товара
         public FormProductEdit(int id)
         {
             InitializeComponent();
@@ -29,20 +30,18 @@ namespace WarehouseManagementSystem.Forms
             LoadProductData();
         }
 
-        // Загрузка категорий в ComboBox
         private void LoadCategories()
         {
             try
             {
-                string query = "SELECT Id, Name FROM Categories ORDER BY Name";
-                DataTable dt = DatabaseHelper.ExecuteQuery(query);
+                string sql = "SELECT Id, Name FROM Categories ORDER BY Name";
+                DataTable data = DatabaseHelper.ExecuteQuery(sql);
 
-                cmbCategory.DataSource = dt;
+                cmbCategory.DataSource = data;
                 cmbCategory.DisplayMember = "Name";
                 cmbCategory.ValueMember = "Id";
 
-                // Добавляем пустую категорию, если нет данных
-                if (dt.Rows.Count == 0)
+                if (data.Rows.Count == 0)
                 {
                     cmbCategory.Items.Add("Нет категорий");
                 }
@@ -54,28 +53,26 @@ namespace WarehouseManagementSystem.Forms
             }
         }
 
-        // Загрузка данных товара для редактирования
         private void LoadProductData()
         {
             if (!isEdit) return;
 
             try
             {
-                string query = "SELECT * FROM Products WHERE Id = @Id";
+                string sql = "SELECT * FROM Products WHERE Id = @Id";
                 NpgsqlParameter[] parameters = { new NpgsqlParameter("@Id", productId) };
-                DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
+                DataTable data = DatabaseHelper.ExecuteQuery(sql, parameters);
 
-                if (dt.Rows.Count > 0)
+                if (data.Rows.Count > 0)
                 {
-                    DataRow row = dt.Rows[0];
+                    DataRow row = data.Rows[0];
                     txtArticle.Text = row["Article"].ToString();
                     txtName.Text = row["Name"].ToString();
 
-                    // Устанавливаем категорию
                     if (row["CategoryId"] != DBNull.Value)
                     {
-                        int categoryId = Convert.ToInt32(row["CategoryId"]);
-                        cmbCategory.SelectedValue = categoryId;
+                        int catId = Convert.ToInt32(row["CategoryId"]);
+                        cmbCategory.SelectedValue = catId;
                     }
 
                     txtUnit.Text = row["UnitOfMeasure"].ToString();
@@ -94,10 +91,8 @@ namespace WarehouseManagementSystem.Forms
             }
         }
 
-        // Сохранение товара
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // Проверка обязательных полей
             if (string.IsNullOrEmpty(txtArticle.Text))
             {
                 MessageBox.Show("Введите артикул товара!", "Ошибка",
@@ -122,7 +117,6 @@ namespace WarehouseManagementSystem.Forms
                 return;
             }
 
-            // Проверка цены
             decimal price;
             if (!decimal.TryParse(txtPrice.Text, out price))
             {
@@ -140,19 +134,16 @@ namespace WarehouseManagementSystem.Forms
                 return;
             }
 
-            // Проверка срока годности (необязательное поле)
             int? shelfLife = null;
             if (!string.IsNullOrEmpty(txtShelfLife.Text))
             {
                 int sl;
-                if (int.TryParse(txtShelfLife.Text, out sl))
+                if (int.TryParse(txtShelfLife.Text, out sl) && sl > 0)
                 {
-                    if (sl > 0)
-                        shelfLife = sl;
+                    shelfLife = sl;
                 }
             }
 
-            // Проверка выбора категории
             int? categoryId = null;
             if (cmbCategory.SelectedValue != null && cmbCategory.SelectedValue is int)
             {
@@ -163,15 +154,10 @@ namespace WarehouseManagementSystem.Forms
             {
                 if (isEdit)
                 {
-                    // Обновление существующего товара
-                    string query = @"UPDATE Products 
-                                    SET Article = @Article, 
-                                        Name = @Name, 
-                                        CategoryId = @CategoryId,
-                                        UnitOfMeasure = @Unit, 
-                                        PurchasePrice = @Price, 
-                                        ShelfLife = @ShelfLife
-                                    WHERE Id = @Id";
+                    string sql = @"UPDATE Products 
+                                  SET Article = @Article, Name = @Name, CategoryId = @CategoryId,
+                                      UnitOfMeasure = @Unit, PurchasePrice = @Price, ShelfLife = @ShelfLife
+                                  WHERE Id = @Id";
 
                     NpgsqlParameter[] parameters = {
                         new NpgsqlParameter("@Article", txtArticle.Text),
@@ -183,17 +169,16 @@ namespace WarehouseManagementSystem.Forms
                         new NpgsqlParameter("@Id", productId)
                     };
 
-                    DatabaseHelper.ExecuteNonQuery(query, parameters);
+                    DatabaseHelper.ExecuteNonQuery(sql, parameters);
                     MessageBox.Show("Товар успешно обновлен!", "Успех",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    // Добавление нового товара
-                    string query = @"INSERT INTO Products (Article, Name, CategoryId, UnitOfMeasure, PurchasePrice, ShelfLife) 
-                                    VALUES (@Article, @Name, @CategoryId, @Unit, @Price, @ShelfLife)";
+                    string insertSql = @"INSERT INTO Products (Article, Name, CategoryId, UnitOfMeasure, PurchasePrice, ShelfLife) 
+                                        VALUES (@Article, @Name, @CategoryId, @Unit, @Price, @ShelfLife)";
 
-                    NpgsqlParameter[] parameters = {
+                    NpgsqlParameter[] insertParams = {
                         new NpgsqlParameter("@Article", txtArticle.Text),
                         new NpgsqlParameter("@Name", txtName.Text),
                         new NpgsqlParameter("@CategoryId", categoryId.HasValue ? (object)categoryId.Value : DBNull.Value),
@@ -202,16 +187,14 @@ namespace WarehouseManagementSystem.Forms
                         new NpgsqlParameter("@ShelfLife", shelfLife.HasValue ? (object)shelfLife.Value : DBNull.Value)
                     };
 
-                    DatabaseHelper.ExecuteNonQuery(query, parameters);
+                    DatabaseHelper.ExecuteNonQuery(insertSql, insertParams);
 
-                    // Получаем ID нового товара
-                    string lastIdQuery = "SELECT lastval()";
-                    int newId = Convert.ToInt32(DatabaseHelper.ExecuteScalar(lastIdQuery));
+                    string lastIdSql = "SELECT lastval()";
+                    int newId = Convert.ToInt32(DatabaseHelper.ExecuteScalar(lastIdSql));
 
-                    // Добавляем запись об остатках (0)
-                    string stockQuery = "INSERT INTO StockBalances (ProductId, Quantity) VALUES (@ProductId, 0)";
+                    string stockSql = "INSERT INTO StockBalances (ProductId, Quantity) VALUES (@ProductId, 0)";
                     NpgsqlParameter[] stockParams = { new NpgsqlParameter("@ProductId", newId) };
-                    DatabaseHelper.ExecuteNonQuery(stockQuery, stockParams);
+                    DatabaseHelper.ExecuteNonQuery(stockSql, stockParams);
 
                     MessageBox.Show("Товар успешно добавлен!", "Успех",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -227,17 +210,14 @@ namespace WarehouseManagementSystem.Forms
             }
         }
 
-        // Отмена
         private void btnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
-        // Валидация цены при вводе
         private void txtPrice_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Разрешаем цифры, запятую, точку и Backspace
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) &&
                 e.KeyChar != ',' && e.KeyChar != '.')
             {
@@ -245,10 +225,8 @@ namespace WarehouseManagementSystem.Forms
             }
         }
 
-        // Валидация срока годности
         private void txtShelfLife_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Разрешаем только цифры и Backspace
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true;

@@ -11,6 +11,9 @@ namespace WarehouseManagementSystem.Forms
         public FormRegistration()
         {
             InitializeComponent();
+
+           
+            this.btnRegister.Click += new EventHandler(this.btnRegister_Click);
         }
 
         private void btnRegister_Click(object sender, EventArgs e)

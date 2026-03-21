@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormSelectProduct : Form
@@ -23,15 +24,21 @@ namespace WarehouseManagementSystem.Forms
         private decimal availableStock = 0;
         private decimal productPrice = 0;
 
-        // Конструктор для выбора товара из списка
         public FormSelectProduct()
         {
             InitializeComponent();
+            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
+            this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
+            this.btnCancel.Click += new EventHandler(this.btnCancel_Click);
+            this.dgvProducts.SelectionChanged += new EventHandler(this.dgvProducts_SelectionChanged);
+            this.txtQuantity.TextChanged += new EventHandler(this.txtQuantity_TextChanged);
+            this.txtQuantity.KeyPress += new KeyPressEventHandler(this.txtQuantity_KeyPress);
+            this.dgvProducts.CellDoubleClick += new DataGridViewCellEventHandler(this.dgvProducts_CellDoubleClick);
+
             LoadProducts();
             SetupButtons();
         }
 
-        // Конструктор для предварительно выбранного товара (из FormNewShipment)
         public FormSelectProduct(int productId, string article, string name, decimal stock, decimal price)
         {
             InitializeComponent();
@@ -41,26 +48,24 @@ namespace WarehouseManagementSystem.Forms
             availableStock = stock;
             productPrice = price;
 
-            // Создаем временную таблицу с выбранным товаром
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Id", typeof(int));
-            dt.Columns.Add("Article", typeof(string));
-            dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("StockQuantity", typeof(decimal));
-            dt.Rows.Add(productId, article, name, stock);
+            DataTable data = new DataTable();
+            data.Columns.Add("Id", typeof(int));
+            data.Columns.Add("Article", typeof(string));
+            data.Columns.Add("Name", typeof(string));
+            data.Columns.Add("StockQuantity", typeof(decimal));
+            data.Rows.Add(productId, article, name, stock);
 
-            dgvProducts.DataSource = dt;
+            dgvProducts.DataSource = data;
             dgvProducts.Columns["Id"].Visible = false;
             dgvProducts.Columns["Article"].HeaderText = "Артикул";
             dgvProducts.Columns["Name"].HeaderText = "Название";
             dgvProducts.Columns["StockQuantity"].HeaderText = "Остаток";
 
-            // Выбираем строку
             if (dgvProducts.Rows.Count > 0)
                 dgvProducts.Rows[0].Selected = true;
 
             lblAvailable.Text = $"Доступно: {stock}";
-            dgvProducts.Enabled = false; // Запрещаем выбор других товаров
+            dgvProducts.Enabled = false;
             txtSearch.Enabled = false;
             btnSearch.Enabled = false;
         }
@@ -72,19 +77,16 @@ namespace WarehouseManagementSystem.Forms
 
         private void SetupButtons()
         {
-            // Кнопка Найти
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.FlatAppearance.BorderColor = Color.Black;
             btnSearch.FlatAppearance.BorderSize = 1;
             btnSearch.BackColor = Color.White;
 
-            // Кнопка Добавить
             btnAdd.FlatStyle = FlatStyle.Flat;
             btnAdd.FlatAppearance.BorderColor = Color.Black;
             btnAdd.FlatAppearance.BorderSize = 1;
             btnAdd.BackColor = Color.White;
 
-            // Кнопка Отмена
             btnCancel.FlatStyle = FlatStyle.Flat;
             btnCancel.FlatAppearance.BorderColor = Color.Black;
             btnCancel.FlatAppearance.BorderSize = 1;
@@ -95,16 +97,16 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                string query = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
-                                FROM vw_ProductsWithStock
-                                WHERE StockQuantity > 0";
+                string sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
+                              FROM vw_ProductsWithStock
+                              WHERE StockQuantity > 0";
 
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    query += " AND (Article ILIKE @Search OR Name ILIKE @Search)";
+                    sql += " AND (Article ILIKE @Search OR Name ILIKE @Search)";
                 }
 
-                query += " ORDER BY Name";
+                sql += " ORDER BY Name";
 
                 NpgsqlParameter[] parameters = null;
                 if (!string.IsNullOrEmpty(searchText))
@@ -114,8 +116,8 @@ namespace WarehouseManagementSystem.Forms
                     };
                 }
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
-                dgvProducts.DataSource = dt;
+                DataTable data = DatabaseHelper.ExecuteQuery(sql, parameters);
+                dgvProducts.DataSource = data;
 
                 dgvProducts.Columns["Id"].Visible = false;
                 dgvProducts.Columns["Article"].HeaderText = "Артикул";
@@ -126,7 +128,6 @@ namespace WarehouseManagementSystem.Forms
 
                 dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                // Очищаем поле количества и метку
                 txtQuantity.Text = "";
                 lblAvailable.Text = "Доступно: 0";
                 selectedProductId = -1;
@@ -160,7 +161,6 @@ namespace WarehouseManagementSystem.Forms
 
         private void txtQuantity_TextChanged(object sender, EventArgs e)
         {
-            // Проверка введенного количества
             if (decimal.TryParse(txtQuantity.Text, out decimal quantity))
             {
                 if (quantity > availableStock)
@@ -183,7 +183,6 @@ namespace WarehouseManagementSystem.Forms
 
         private void txtQuantity_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Разрешаем цифры, запятую, точку и Backspace
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) &&
                 e.KeyChar != ',' && e.KeyChar != '.')
             {
@@ -193,7 +192,6 @@ namespace WarehouseManagementSystem.Forms
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            // Проверка выбора товара
             if (selectedProductId == -1)
             {
                 MessageBox.Show("Выберите товар из списка", "Ошибка",
@@ -201,7 +199,6 @@ namespace WarehouseManagementSystem.Forms
                 return;
             }
 
-            // Проверка ввода количества
             if (string.IsNullOrEmpty(txtQuantity.Text))
             {
                 MessageBox.Show("Введите количество", "Ошибка",
@@ -231,7 +228,6 @@ namespace WarehouseManagementSystem.Forms
                 return;
             }
 
-            // Создаем выбранный товар
             selectedProduct = new SelectedProductItem
             {
                 ProductId = selectedProductId,
@@ -252,7 +248,6 @@ namespace WarehouseManagementSystem.Forms
             this.Close();
         }
 
-        // Двойной клик по товару для быстрого добавления
         private void dgvProducts_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)

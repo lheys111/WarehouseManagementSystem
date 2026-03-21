@@ -11,6 +11,8 @@ namespace WarehouseManagementSystem.Forms
         public FormCategories()
         {
             InitializeComponent();
+            this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
+            this.dgvCategories.CellClick += new DataGridViewCellEventHandler(this.dgvCategories_CellClick);
             LoadCategories();
         }
 
@@ -18,14 +20,14 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                string query = @"SELECT c.Id, c.Name, c.Description, COUNT(p.Id) as ProductsCount
-                                FROM Categories c
-                                LEFT JOIN Products p ON c.Id = p.CategoryId
-                                GROUP BY c.Id, c.Name, c.Description
-                                ORDER BY c.Name";
+                string sql = @"SELECT c.Id, c.Name, c.Description, COUNT(p.Id) as ProductsCount
+                              FROM Categories c
+                              LEFT JOIN Products p ON c.Id = p.CategoryId
+                              GROUP BY c.Id, c.Name, c.Description
+                              ORDER BY c.Name";
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(query);
-                dgvCategories.DataSource = dt;
+                DataTable data = DatabaseHelper.ExecuteQuery(sql);
+                dgvCategories.DataSource = data;
 
                 if (dgvCategories.Columns.Contains("Id"))
                     dgvCategories.Columns["Id"].Visible = false;
@@ -36,21 +38,20 @@ namespace WarehouseManagementSystem.Forms
                 if (dgvCategories.Columns.Contains("ProductsCount"))
                     dgvCategories.Columns["ProductsCount"].HeaderText = "Товаров";
 
-                // Добавляем кнопки
                 if (!dgvCategories.Columns.Contains("btnEdit"))
                 {
-                    DataGridViewButtonColumn btnEdit = new DataGridViewButtonColumn();
-                    btnEdit.Name = "btnEdit";
-                    btnEdit.HeaderText = "Действия";
-                    btnEdit.Text = "Изменить";
-                    btnEdit.UseColumnTextForButtonValue = true;
-                    dgvCategories.Columns.Add(btnEdit);
+                    DataGridViewButtonColumn editCol = new DataGridViewButtonColumn();
+                    editCol.Name = "btnEdit";
+                    editCol.HeaderText = "Действия";
+                    editCol.Text = "Изменить";
+                    editCol.UseColumnTextForButtonValue = true;
+                    dgvCategories.Columns.Add(editCol);
 
-                    DataGridViewButtonColumn btnDelete = new DataGridViewButtonColumn();
-                    btnDelete.Name = "btnDelete";
-                    btnDelete.Text = "Удалить";
-                    btnDelete.UseColumnTextForButtonValue = true;
-                    dgvCategories.Columns.Add(btnDelete);
+                    DataGridViewButtonColumn deleteCol = new DataGridViewButtonColumn();
+                    deleteCol.Name = "btnDelete";
+                    deleteCol.Text = "Удалить";
+                    deleteCol.UseColumnTextForButtonValue = true;
+                    dgvCategories.Columns.Add(deleteCol);
                 }
 
                 dgvCategories.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -72,34 +73,34 @@ namespace WarehouseManagementSystem.Forms
         {
             if (e.RowIndex < 0) return;
 
-            int categoryId = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["Id"].Value);
-            string categoryName = dgvCategories.Rows[e.RowIndex].Cells["Name"].Value.ToString();
-            string categoryDesc = dgvCategories.Rows[e.RowIndex].Cells["Description"].Value?.ToString();
+            int id = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["Id"].Value);
+            string name = dgvCategories.Rows[e.RowIndex].Cells["Name"].Value.ToString();
+            string description = dgvCategories.Rows[e.RowIndex].Cells["Description"].Value?.ToString();
 
             if (dgvCategories.Columns[e.ColumnIndex].Name == "btnEdit")
             {
-                FormCategoryEdit editForm = new FormCategoryEdit(categoryId, categoryName, categoryDesc);
+                FormCategoryEdit editForm = new FormCategoryEdit(id, name, description);
                 if (editForm.ShowDialog() == DialogResult.OK)
                     LoadCategories();
             }
             else if (dgvCategories.Columns[e.ColumnIndex].Name == "btnDelete")
             {
-                int productsCount = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["ProductsCount"].Value);
+                int productCount = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["ProductsCount"].Value);
 
-                if (productsCount > 0)
+                if (productCount > 0)
                 {
-                    MessageBox.Show($"Нельзя удалить категорию '{categoryName}', так как в ней есть товары",
+                    MessageBox.Show($"Нельзя удалить категорию '{name}', так как в ней есть товары",
                         "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                if (MessageBox.Show($"Удалить категорию '{categoryName}'?", "Подтверждение",
+                if (MessageBox.Show($"Удалить категорию '{name}'?", "Подтверждение",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     try
                     {
-                        string query = "DELETE FROM Categories WHERE Id = @Id";
-                        DatabaseHelper.ExecuteNonQuery(query, new[] { new NpgsqlParameter("@Id", categoryId) });
+                        string deleteSql = "DELETE FROM Categories WHERE Id = @Id";
+                        DatabaseHelper.ExecuteNonQuery(deleteSql, new[] { new NpgsqlParameter("@Id", id) });
                         LoadCategories();
                     }
                     catch (Exception ex)

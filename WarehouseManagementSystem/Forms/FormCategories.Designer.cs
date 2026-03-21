@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.btnAdd = new System.Windows.Forms.Button();
-            this.dgvCategories = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.dgvCategories = new System.Windows.Forms.DataGridView();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCategories)).BeginInit();
             this.SuspendLayout();
@@ -44,37 +44,8 @@
             this.panel1.Controls.Add(this.btnAdd);
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(803, 45);
+            this.panel1.Size = new System.Drawing.Size(1342, 45);
             this.panel1.TabIndex = 0;
-            // 
-            // panel2
-            // 
-            this.panel2.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.panel2.Location = new System.Drawing.Point(0, 410);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(803, 41);
-            this.panel2.TabIndex = 0;
-            // 
-            // btnAdd
-            // 
-            this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAdd.Location = new System.Drawing.Point(683, 12);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(105, 23);
-            this.btnAdd.TabIndex = 0;
-            this.btnAdd.Text = "+ Добавить";
-            this.btnAdd.UseVisualStyleBackColor = true;
-            // 
-            // dgvCategories
-            // 
-            this.dgvCategories.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
-            this.dgvCategories.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvCategories.Location = new System.Drawing.Point(28, 87);
-            this.dgvCategories.Name = "dgvCategories";
-            this.dgvCategories.RowHeadersWidth = 51;
-            this.dgvCategories.RowTemplate.Height = 24;
-            this.dgvCategories.Size = new System.Drawing.Size(525, 294);
-            this.dgvCategories.TabIndex = 1;
             // 
             // label1
             // 
@@ -86,17 +57,44 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "Управление категориями";
             // 
+            // btnAdd
+            // 
+            this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAdd.Location = new System.Drawing.Point(1215, 3);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(105, 39);
+            this.btnAdd.TabIndex = 0;
+            this.btnAdd.Text = "+ Добавить";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.MediumAquamarine;
+            this.panel2.Location = new System.Drawing.Point(0, 631);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(1338, 41);
+            this.panel2.TabIndex = 0;
+            // 
+            // dgvCategories
+            // 
+            this.dgvCategories.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
+            this.dgvCategories.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvCategories.Location = new System.Drawing.Point(28, 87);
+            this.dgvCategories.Name = "dgvCategories";
+            this.dgvCategories.RowHeadersWidth = 51;
+            this.dgvCategories.RowTemplate.Height = 24;
+            this.dgvCategories.Size = new System.Drawing.Size(790, 458);
+            this.dgvCategories.TabIndex = 1;
+            // 
             // FormCategories
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1332, 665);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.dgvCategories);
             this.Name = "FormCategories";
-            this.Text = "FormCategories";
-           // this.Load += new System.EventHandler(this.FormCategories_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCategories)).EndInit();

@@ -172,7 +172,6 @@
             this.Controls.Add(this.btnRefreshStock);
             this.Controls.Add(this.panel1);
             this.Name = "FormNewShipment";
-            this.Text = "FormNewShipment";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).EndInit();

@@ -155,8 +155,6 @@
             this.Controls.Add(this.txtPassword);
             this.Controls.Add(this.txtConfirmPassword);
             this.Name = "FormRegistration";
-            this.Text = "FormRegistration";
-          //  this.Load += new System.EventHandler(this.FormRegistration_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -96,8 +96,6 @@
             this.Controls.Add(this.dgvShipments);
             this.Controls.Add(this.panel1);
             this.Name = "FormShipmentHistory";
-            this.Text = "FormShipmentHistory";
-//            this.Load += new System.EventHandler(this.FormShipmentHistory_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvShipments)).EndInit();

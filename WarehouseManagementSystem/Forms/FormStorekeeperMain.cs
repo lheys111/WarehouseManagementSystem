@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
-using static System.Collections.Specialized.BitVector32;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormStorekeeperMain : Form
@@ -12,12 +12,15 @@ namespace WarehouseManagementSystem.Forms
         public FormStorekeeperMain()
         {
             InitializeComponent();
+            this.btnExit.Click += new EventHandler(this.btnExit_Click);
+            this.остаткиToolStripMenuItem.Click += new EventHandler(this.остаткиToolStripMenuItem_Click);
+            this.отгрузкиToolStripMenuItem.Click += new EventHandler(this.отгрузкиToolStripMenuItem_Click);
+            this.новаяОтгрузкаToolStripMenuItem.Click += new EventHandler(this.новаяОтгрузкаToolStripMenuItem_Click);
         }
 
         private void FormStorekeeperMain_Load(object sender, EventArgs e)
         {
             this.Text = "Складская система - Кладовщик";
-            //lblUser.Text = $"Кладовщик: {Session.CurrentUser.FullName}";
         }
 
         private void OpenChildForm(Form childForm)

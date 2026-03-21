@@ -6,7 +6,6 @@ namespace WarehouseManagementSystem.Services
 {
     public static class PasswordHasher
     {
-        // Хеширование пароля
         public static string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -15,8 +14,6 @@ namespace WarehouseManagementSystem.Services
                 return Convert.ToBase64String(hashedBytes);
             }
         }
-
-        // Проверка пароля
         public static bool VerifyPassword(string password, string hash)
         {
             var hashOfInput = HashPassword(password);

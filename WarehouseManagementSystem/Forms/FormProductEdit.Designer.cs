@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -57,14 +57,6 @@
             this.panel1.Size = new System.Drawing.Size(464, 36);
             this.panel1.TabIndex = 0;
             // 
-            // panel2
-            // 
-            this.panel2.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.panel2.Location = new System.Drawing.Point(0, 461);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(464, 28);
-            this.panel2.TabIndex = 0;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -75,6 +67,14 @@
             this.label1.Size = new System.Drawing.Size(134, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "Карточка товара";
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.MediumAquamarine;
+            this.panel2.Location = new System.Drawing.Point(0, 461);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(464, 28);
+            this.panel2.TabIndex = 0;
             // 
             // label2
             // 
@@ -223,8 +223,6 @@
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "FormProductEdit";
-            this.Text = "FormProductEdit";
-         //   this.Load += new System.EventHandler(this.FormProductEdit_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);

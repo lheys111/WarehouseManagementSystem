@@ -14,7 +14,6 @@ namespace WarehouseManagementSystem.Forms
         {
             InitializeComponent();
 
-            // Привязка событий
             this.btnLogin.Click += new EventHandler(this.btnLogin_Click);
             this.lnkRegister.LinkClicked += new LinkLabelLinkClickedEventHandler(this.lnkRegister_LinkClicked);
         }
@@ -33,13 +32,13 @@ namespace WarehouseManagementSystem.Forms
 
             try
             {
-                string query = "SELECT Id, FullName, Role FROM Users WHERE Email = @Email AND PasswordHash = @Password";
+                string sql = "SELECT Id, FullName, Role FROM Users WHERE Email = @Email AND PasswordHash = @Password";
                 NpgsqlParameter[] parameters = {
                     new NpgsqlParameter("@Email", email),
                     new NpgsqlParameter("@Password", password)
                 };
 
-                DataTable result = DatabaseHelper.ExecuteQuery(query, parameters);
+                DataTable result = DatabaseHelper.ExecuteQuery(sql, parameters);
 
                 if (result.Rows.Count > 0)
                 {

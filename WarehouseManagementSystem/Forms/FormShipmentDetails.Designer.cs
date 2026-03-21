@@ -132,8 +132,6 @@
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "FormShipmentDetails";
-            this.Text = "FormShipmentDetails";
-      //      this.Load += new System.EventHandler(this.FormShipmentDetails_Load);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDetails)).EndInit();

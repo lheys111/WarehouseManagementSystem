@@ -164,7 +164,6 @@
             this.Controls.Add(this.txtQuantity);
             this.Controls.Add(this.lblAvailable);
             this.Name = "FormSelectProduct";
-            this.Text = "FormSelectProduct";
             ((System.ComponentModel.ISupportInitialize)(this.dgvProducts)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

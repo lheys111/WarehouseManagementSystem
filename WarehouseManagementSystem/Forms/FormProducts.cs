@@ -7,9 +7,14 @@ namespace WarehouseManagementSystem.Forms
 {
     public partial class FormProducts : Form
     {
+
         public FormProducts()
         {
             InitializeComponent();
+            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
+            this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
+            this.btnEdit.Click += new EventHandler(this.btnEdit_Click);
+            this.btnDelete.Click += new EventHandler(this.btnDelete_Click);
             LoadProducts();
         }
 

@@ -51,7 +51,7 @@
             // 
             this.btnAdd.Location = new System.Drawing.Point(24, 12);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(91, 23);
+            this.btnAdd.Size = new System.Drawing.Size(91, 30);
             this.btnAdd.TabIndex = 1;
             this.btnAdd.Text = "Добавить";
             this.btnAdd.UseVisualStyleBackColor = true;
@@ -60,7 +60,7 @@
             // 
             this.btnEdit.Location = new System.Drawing.Point(121, 12);
             this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(121, 23);
+            this.btnEdit.Size = new System.Drawing.Size(121, 30);
             this.btnEdit.TabIndex = 2;
             this.btnEdit.Text = "Редактировать";
             this.btnEdit.UseVisualStyleBackColor = true;
@@ -69,7 +69,7 @@
             // 
             this.btnDelete.Location = new System.Drawing.Point(248, 12);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.Size = new System.Drawing.Size(75, 30);
             this.btnDelete.TabIndex = 3;
             this.btnDelete.Text = "Удалить";
             this.btnDelete.UseVisualStyleBackColor = true;
@@ -79,7 +79,7 @@
             this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSearch.Location = new System.Drawing.Point(343, 12);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(75, 23);
+            this.btnSearch.Size = new System.Drawing.Size(75, 30);
             this.btnSearch.TabIndex = 4;
             this.btnSearch.Text = "Найти";
             this.btnSearch.UseVisualStyleBackColor = true;
@@ -117,8 +117,6 @@
             this.Controls.Add(this.dgvProducts);
             this.Controls.Add(this.panel1);
             this.Name = "FormProducts";
-            this.Text = "FormProducts";
-         //   this.Load += new System.EventHandler(this.FormProducts_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvProducts)).EndInit();

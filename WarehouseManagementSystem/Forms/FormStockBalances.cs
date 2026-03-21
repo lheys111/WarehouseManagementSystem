@@ -11,6 +11,7 @@ namespace WarehouseManagementSystem.Forms
         public FormStockBalances()
         {
             InitializeComponent();
+            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
             LoadStock();
             SetupButtons();
         }
