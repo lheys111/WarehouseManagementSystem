@@ -1,9 +1,9 @@
-﻿using Npgsql;
-using System;
+﻿using System;
 using System.Data;
-using System.Drawing;
+using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormStockBalances : Form
@@ -11,58 +11,65 @@ namespace WarehouseManagementSystem.Forms
         public FormStockBalances()
         {
             InitializeComponent();
-            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
+            InitializeEvents();
             LoadStock();
-            SetupButtons();
+            Text = Constants.FormTitles.StockBalances;
         }
 
-        private void SetupButtons()
+        private void InitializeEvents()
         {
-            btnSearch.FlatStyle = FlatStyle.Flat;
-            btnSearch.FlatAppearance.BorderColor = Color.Black;
-            btnSearch.FlatAppearance.BorderSize = 1;
-            btnSearch.BackColor = Color.White;
+            btnSearch.Click += btnSearch_Click;
         }
 
         private void LoadStock(string searchText = "")
         {
             try
             {
-                string query = @"SELECT Article, Name, Category, UnitOfMeasure, StockQuantity, PurchasePrice
-                                FROM vw_StockForStorekeeper";
+                var sql = @"SELECT Article, Name, Category, UnitOfMeasure, StockQuantity, PurchasePrice
+                           FROM vw_StockForStorekeeper";
 
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    query += " WHERE Article ILIKE @Search OR Name ILIKE @Search";
+                    sql += " WHERE Article ILIKE @Search OR Name ILIKE @Search";
                 }
 
-                query += " ORDER BY Name";
+                sql += " ORDER BY Name";
 
                 NpgsqlParameter[] parameters = null;
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    parameters = new NpgsqlParameter[] {
-                        new NpgsqlParameter("@Search", "%" + searchText + "%")
-                    };
+                    parameters = new[] { new NpgsqlParameter("@Search", "%" + searchText + "%") };
                 }
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
-                dgvStock.DataSource = dt;
+                var data = DatabaseHelper.ExecuteQuery(sql, parameters);
+                dgvStock.DataSource = data;
 
-                dgvStock.Columns["Article"].HeaderText = "Артикул";
-                dgvStock.Columns["Name"].HeaderText = "Название";
-                dgvStock.Columns["Category"].HeaderText = "Категория";
-                dgvStock.Columns["UnitOfMeasure"].HeaderText = "Ед. изм.";
-                dgvStock.Columns["StockQuantity"].HeaderText = "Остаток";
-                dgvStock.Columns["PurchasePrice"].HeaderText = "Цена закупки";
-
-                dgvStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                ConfigureGrid();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки: " + ex.Message, "Ошибка",
+                AppLogger.Error(ex, "Ошибка загрузки остатков");
+                MessageBox.Show(Constants.Messages.ConnectionError, Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void ConfigureGrid()
+        {
+            if (dgvStock.Columns.Contains("Article"))
+                dgvStock.Columns["Article"].HeaderText = Constants.GridHeaders.Article;
+            if (dgvStock.Columns.Contains("Name"))
+                dgvStock.Columns["Name"].HeaderText = Constants.GridHeaders.Name;
+            if (dgvStock.Columns.Contains("Category"))
+                dgvStock.Columns["Category"].HeaderText = Constants.GridHeaders.Category;
+            if (dgvStock.Columns.Contains("UnitOfMeasure"))
+                dgvStock.Columns["UnitOfMeasure"].HeaderText = Constants.GridHeaders.Unit;
+            if (dgvStock.Columns.Contains("StockQuantity"))
+                dgvStock.Columns["StockQuantity"].HeaderText = Constants.GridHeaders.Stock;
+            if (dgvStock.Columns.Contains("PurchasePrice"))
+                dgvStock.Columns["PurchasePrice"].HeaderText = Constants.GridHeaders.Price;
+
+            dgvStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void btnSearch_Click(object sender, EventArgs e)

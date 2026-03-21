@@ -3,69 +3,74 @@ using System.Data;
 using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormProducts : Form
     {
-
         public FormProducts()
         {
             InitializeComponent();
-            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
-            this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
-            this.btnEdit.Click += new EventHandler(this.btnEdit_Click);
-            this.btnDelete.Click += new EventHandler(this.btnDelete_Click);
+            InitializeEvents();
             LoadProducts();
+        }
+
+        private void InitializeEvents()
+        {
+            btnSearch.Click += btnSearch_Click;
+            btnAdd.Click += btnAdd_Click;
+            btnEdit.Click += btnEdit_Click;
+            btnDelete.Click += btnDelete_Click;
         }
 
         private void LoadProducts(string searchText = "")
         {
             try
             {
-                string query = @"SELECT Id, Article, Name, CategoryName, UnitOfMeasure, 
-                                        PurchasePrice, StockQuantity 
-                                FROM vw_ProductsWithStock";
-
+                var sql = Constants.Queries.GetProductsWithStock;
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    query += " WHERE Article ILIKE @Search OR Name ILIKE @Search";
+                    sql += " WHERE Article ILIKE @Search OR Name ILIKE @Search";
                 }
-
-                query += " ORDER BY Name";
+                sql += " ORDER BY Name";
 
                 NpgsqlParameter[] parameters = null;
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    parameters = new NpgsqlParameter[] {
-                        new NpgsqlParameter("@Search", "%" + searchText + "%")
-                    };
+                    parameters = new[] { new NpgsqlParameter("@Search", "%" + searchText + "%") };
                 }
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
-                dgvProducts.DataSource = dt;
+                var data = DatabaseHelper.ExecuteQuery(sql, parameters);
+                dgvProducts.DataSource = data;
 
-                if (dgvProducts.Columns.Contains("Id"))
-                    dgvProducts.Columns["Id"].Visible = false;
-                if (dgvProducts.Columns.Contains("Article"))
-                    dgvProducts.Columns["Article"].HeaderText = "Артикул";
-                if (dgvProducts.Columns.Contains("Name"))
-                    dgvProducts.Columns["Name"].HeaderText = "Название";
-                if (dgvProducts.Columns.Contains("CategoryName"))
-                    dgvProducts.Columns["CategoryName"].HeaderText = "Категория";
-                if (dgvProducts.Columns.Contains("UnitOfMeasure"))
-                    dgvProducts.Columns["UnitOfMeasure"].HeaderText = "Ед. изм.";
-                if (dgvProducts.Columns.Contains("PurchasePrice"))
-                    dgvProducts.Columns["PurchasePrice"].HeaderText = "Цена закупки";
-                if (dgvProducts.Columns.Contains("StockQuantity"))
-                    dgvProducts.Columns["StockQuantity"].HeaderText = "Остаток";
-
-                dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                ConfigureGrid();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки: " + ex.Message, "Ошибка",
+                AppLogger.Error(ex, "Ошибка загрузки товаров");
+                MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Products,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void ConfigureGrid()
+        {
+            if (dgvProducts.Columns.Contains("Id"))
+                dgvProducts.Columns["Id"].Visible = false;
+            if (dgvProducts.Columns.Contains("Article"))
+                dgvProducts.Columns["Article"].HeaderText = Constants.GridHeaders.Article;
+            if (dgvProducts.Columns.Contains("Name"))
+                dgvProducts.Columns["Name"].HeaderText = Constants.GridHeaders.Name;
+            if (dgvProducts.Columns.Contains("CategoryName"))
+                dgvProducts.Columns["CategoryName"].HeaderText = Constants.GridHeaders.Category;
+            if (dgvProducts.Columns.Contains("UnitOfMeasure"))
+                dgvProducts.Columns["UnitOfMeasure"].HeaderText = Constants.GridHeaders.Unit;
+            if (dgvProducts.Columns.Contains("PurchasePrice"))
+                dgvProducts.Columns["PurchasePrice"].HeaderText = Constants.GridHeaders.Price;
+            if (dgvProducts.Columns.Contains("StockQuantity"))
+                dgvProducts.Columns["StockQuantity"].HeaderText = Constants.GridHeaders.Stock;
+
+            dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -75,49 +80,55 @@ namespace WarehouseManagementSystem.Forms
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            FormProductEdit editForm = new FormProductEdit();
+            var editForm = new FormProductEdit();
             if (editForm.ShowDialog() == DialogResult.OK)
                 LoadProducts(txtSearch.Text);
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            if (dgvProducts.CurrentRow != null)
+            if (dgvProducts.CurrentRow == null)
             {
-                int productId = Convert.ToInt32(dgvProducts.CurrentRow.Cells["Id"].Value);
-                FormProductEdit editForm = new FormProductEdit(productId);
-                if (editForm.ShowDialog() == DialogResult.OK)
-                    LoadProducts(txtSearch.Text);
-            }
-            else
-            {
-                MessageBox.Show("Выберите товар", "Внимание",
+                MessageBox.Show(Constants.Messages.SelectItem, Constants.FormTitles.Products,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+
+            var productId = Convert.ToInt32(dgvProducts.CurrentRow.Cells["Id"].Value);
+            var editForm = new FormProductEdit(productId);
+            if (editForm.ShowDialog() == DialogResult.OK)
+                LoadProducts(txtSearch.Text);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (dgvProducts.CurrentRow != null)
+            if (dgvProducts.CurrentRow == null)
             {
-                int productId = Convert.ToInt32(dgvProducts.CurrentRow.Cells["Id"].Value);
-                string productName = dgvProducts.CurrentRow.Cells["Name"].Value.ToString();
+                MessageBox.Show(Constants.Messages.SelectItem, Constants.FormTitles.Products,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-                if (MessageBox.Show($"Удалить '{productName}'?", "Подтверждение",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    try
-                    {
-                        string query = "DELETE FROM Products WHERE Id = @Id";
-                        DatabaseHelper.ExecuteNonQuery(query, new[] { new NpgsqlParameter("@Id", productId) });
-                        LoadProducts(txtSearch.Text);
-                        MessageBox.Show("Товар удален", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
+            var productId = Convert.ToInt32(dgvProducts.CurrentRow.Cells["Id"].Value);
+            var productName = dgvProducts.CurrentRow.Cells["Name"].Value.ToString();
+
+            var confirm = MessageBox.Show($"Удалить товар '{productName}'? {Constants.Messages.DeleteConfirm}",
+                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            try
+            {
+                var parameters = new[] { new NpgsqlParameter("@Id", productId) };
+                DatabaseHelper.ExecuteNonQuery("DELETE FROM Products WHERE Id = @Id", parameters);
+                AppLogger.Info($"Удален товар: {productName}");
+                LoadProducts(txtSearch.Text);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error(ex, "Ошибка удаления товара");
+                MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Products,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

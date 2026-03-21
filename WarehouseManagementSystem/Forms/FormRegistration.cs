@@ -2,7 +2,6 @@
 using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
-using WarehouseManagementSystem.Models;
 
 namespace WarehouseManagementSystem.Forms
 {
@@ -11,64 +10,70 @@ namespace WarehouseManagementSystem.Forms
         public FormRegistration()
         {
             InitializeComponent();
+            InitializeEvents();
+        }
 
-           
-            this.btnRegister.Click += new EventHandler(this.btnRegister_Click);
+        private void InitializeEvents()
+        {
+            btnRegister.Click += btnRegister_Click;
         }
 
         private void btnRegister_Click(object sender, EventArgs e)
         {
-            string fullName = txtFullName.Text.Trim();
-            string email = txtEmail.Text.Trim();
-            string password = txtPassword.Text;
-            string confirmPassword = txtConfirmPassword.Text;
+            var fullName = txtFullName.Text.Trim();
+            var email = txtEmail.Text.Trim();
+            var password = txtPassword.Text;
+            var confirmPassword = txtConfirmPassword.Text;
 
             if (string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(email) ||
                 string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Заполните все поля", "Ошибка",
+                MessageBox.Show(Constants.Messages.FillAllFields, Constants.FormTitles.Registration,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (password != confirmPassword)
             {
-                MessageBox.Show("Пароли не совпадают", "Ошибка",
+                MessageBox.Show(Constants.Messages.PasswordMismatch, Constants.FormTitles.Registration,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                string checkQuery = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
-                NpgsqlParameter[] checkParams = { new NpgsqlParameter("@Email", email) };
-                int count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(checkQuery, checkParams));
+                var checkParams = new[] { new NpgsqlParameter("@Email", email) };
+                var count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
+                    "SELECT COUNT(*) FROM Users WHERE Email = @Email", checkParams));
 
                 if (count > 0)
                 {
-                    MessageBox.Show("Пользователь с таким email уже существует", "Ошибка",
+                    MessageBox.Show(Constants.Messages.EmailExists, Constants.FormTitles.Registration,
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                string insertQuery = @"INSERT INTO Users (FullName, Email, PasswordHash, Role) 
-                                      VALUES (@FullName, @Email, @PasswordHash, 'Storekeeper')";
-                NpgsqlParameter[] parameters = {
+                var insertParams = new[]
+                {
                     new NpgsqlParameter("@FullName", fullName),
                     new NpgsqlParameter("@Email", email),
                     new NpgsqlParameter("@PasswordHash", password)
                 };
 
-                DatabaseHelper.ExecuteNonQuery(insertQuery, parameters);
+                DatabaseHelper.ExecuteNonQuery(
+                    "INSERT INTO Users (FullName, Email, PasswordHash, Role) VALUES (@FullName, @Email, @PasswordHash, 'Storekeeper')",
+                    insertParams);
 
-                MessageBox.Show("Регистрация успешно завершена!", "Успех",
+                AppLogger.Info($"Зарегистрирован новый пользователь: {email}");
+                MessageBox.Show(Constants.Messages.RegistrationSuccess, Constants.FormTitles.Registration,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                this.Close();
+                Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка: " + ex.Message, "Ошибка",
+                AppLogger.Error(ex, "Ошибка регистрации");
+                MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Registration,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

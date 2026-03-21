@@ -7,69 +7,84 @@ namespace WarehouseManagementSystem.Forms
 {
     public partial class FormCategoryEdit : Form
     {
-        private int categoryId = -1;
+        private int _categoryId = -1;
 
         public FormCategoryEdit()
         {
             InitializeComponent();
-            this.btnSave.Click += new EventHandler(this.btnSave_Click);
-            this.btnCancel.Click += new EventHandler(this.btnCancel_Click);
-            this.Text = "Добавление категории";
+            InitializeEvents();
+            Text = Constants.FormTitles.AddCategory;
         }
 
         public FormCategoryEdit(int id, string name, string description)
         {
             InitializeComponent();
-            this.Text = "Редактирование категории";
-            categoryId = id;
+            InitializeEvents();
+            Text = Constants.FormTitles.EditCategory;
+            _categoryId = id;
             txtName.Text = name;
             txtDescription.Text = description;
+        }
+
+        private void InitializeEvents()
+        {
+            btnSave.Click += btnSave_Click;
+            btnCancel.Click += btnCancel_Click;
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtName.Text))
             {
-                MessageBox.Show("Введите название категории", "Ошибка",
+                MessageBox.Show("Введите название категории", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                if (categoryId == -1)
+                if (_categoryId == -1)
                 {
-                    string sql = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
-                    NpgsqlParameter[] parameters = {
+                    var sql = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
+                    var parameters = new[]
+                    {
                         new NpgsqlParameter("@Name", txtName.Text),
                         new NpgsqlParameter("@Description", string.IsNullOrEmpty(txtDescription.Text) ? (object)DBNull.Value : txtDescription.Text)
                     };
                     DatabaseHelper.ExecuteNonQuery(sql, parameters);
+                    AppLogger.Info($"Добавлена категория: {txtName.Text}");
                 }
                 else
                 {
-                    string sql = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
-                    NpgsqlParameter[] parameters = {
+                    var sql = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
+                    var parameters = new[]
+                    {
                         new NpgsqlParameter("@Name", txtName.Text),
                         new NpgsqlParameter("@Description", string.IsNullOrEmpty(txtDescription.Text) ? (object)DBNull.Value : txtDescription.Text),
-                        new NpgsqlParameter("@Id", categoryId)
+                        new NpgsqlParameter("@Id", _categoryId)
                     };
                     DatabaseHelper.ExecuteNonQuery(sql, parameters);
+                    AppLogger.Info($"Обновлена категория: {txtName.Text}");
                 }
 
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                MessageBox.Show(Constants.Messages.SaveSuccess, Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                DialogResult = DialogResult.OK;
+                Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AppLogger.Error(ex, "Ошибка сохранения категории");
+                MessageBox.Show(Constants.Messages.ConnectionError, Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

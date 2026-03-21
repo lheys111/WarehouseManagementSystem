@@ -1,6 +1,6 @@
-﻿using Npgsql;
-using System;
+﻿using System;
 using System.Data;
+using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
@@ -9,72 +9,80 @@ namespace WarehouseManagementSystem.Forms
 {
     public partial class FormShipmentHistory : Form
     {
-        private bool isStorekeeper = false;
+        private bool _isStorekeeper;
 
         public FormShipmentHistory(bool forStorekeeper = false)
         {
             InitializeComponent();
-            this.btnViewDetails.Click += new EventHandler(this.btnViewDetails_Click);
-            isStorekeeper = forStorekeeper;
+            InitializeEvents();
+            _isStorekeeper = forStorekeeper;
+            Text = Constants.FormTitles.ShipmentHistory;
             LoadShipments();
+        }
+
+        private void InitializeEvents()
+        {
+            btnViewDetails.Click += btnViewDetails_Click;
         }
 
         private void LoadShipments()
         {
             try
             {
-                string sql = @"SELECT Id, ShipmentNumber, ShipmentDate, StorekeeperName, 
-                                      ItemsCount, TotalSum
-                              FROM vw_ShipmentsHistory";
-
-                if (isStorekeeper)
+                DataTable data;
+                if (_isStorekeeper)
                 {
-                    sql += " WHERE StorekeeperName = @Storekeeper";
-                    NpgsqlParameter[] parameters = { new NpgsqlParameter("@Storekeeper", Session.CurrentUser.FullName) };
-                    DataTable data = DatabaseHelper.ExecuteQuery(sql, parameters);
-                    dgvShipments.DataSource = data;
+                    var sql = Constants.Queries.GetAllShipments + " WHERE StorekeeperName = @Storekeeper";
+                    var parameters = new[] { new NpgsqlParameter("@Storekeeper", Session.CurrentUser.FullName) };
+                    data = DatabaseHelper.ExecuteQuery(sql, parameters);
                 }
                 else
                 {
-                    DataTable data = DatabaseHelper.ExecuteQuery(sql);
-                    dgvShipments.DataSource = data;
+                    data = DatabaseHelper.ExecuteQuery(Constants.Queries.GetAllShipments);
                 }
 
-                if (dgvShipments.Columns.Contains("Id"))
-                    dgvShipments.Columns["Id"].Visible = false;
-                if (dgvShipments.Columns.Contains("ShipmentNumber"))
-                    dgvShipments.Columns["ShipmentNumber"].HeaderText = "Номер отгрузки";
-                if (dgvShipments.Columns.Contains("ShipmentDate"))
-                    dgvShipments.Columns["ShipmentDate"].HeaderText = "Дата";
-                if (dgvShipments.Columns.Contains("StorekeeperName"))
-                    dgvShipments.Columns["StorekeeperName"].HeaderText = "Кладовщик";
-                if (dgvShipments.Columns.Contains("ItemsCount"))
-                    dgvShipments.Columns["ItemsCount"].HeaderText = "Количество позиций";
-                if (dgvShipments.Columns.Contains("TotalSum"))
-                    dgvShipments.Columns["TotalSum"].HeaderText = "Общая сумма";
-
-                dgvShipments.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dgvShipments.DataSource = data;
+                ConfigureGrid();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AppLogger.Error(ex, "Ошибка загрузки истории отгрузок");
+                MessageBox.Show(Constants.Messages.ConnectionError, Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void ConfigureGrid()
+        {
+            if (dgvShipments.Columns.Contains("Id"))
+                dgvShipments.Columns["Id"].Visible = false;
+            if (dgvShipments.Columns.Contains("ShipmentNumber"))
+                dgvShipments.Columns["ShipmentNumber"].HeaderText = Constants.GridHeaders.ShipmentNumber;
+            if (dgvShipments.Columns.Contains("ShipmentDate"))
+                dgvShipments.Columns["ShipmentDate"].HeaderText = Constants.GridHeaders.Date;
+            if (dgvShipments.Columns.Contains("StorekeeperName"))
+                dgvShipments.Columns["StorekeeperName"].HeaderText = Constants.GridHeaders.Storekeeper;
+            if (dgvShipments.Columns.Contains("ItemsCount"))
+                dgvShipments.Columns["ItemsCount"].HeaderText = Constants.GridHeaders.ItemsCount;
+            if (dgvShipments.Columns.Contains("TotalSum"))
+                dgvShipments.Columns["TotalSum"].HeaderText = Constants.GridHeaders.TotalSum;
+
+            dgvShipments.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void btnViewDetails_Click(object sender, EventArgs e)
         {
-            if (dgvShipments.CurrentRow != null)
+            if (dgvShipments.CurrentRow == null)
             {
-                int shipmentId = Convert.ToInt32(dgvShipments.CurrentRow.Cells["Id"].Value);
-                string shipmentNumber = dgvShipments.CurrentRow.Cells["ShipmentNumber"].Value.ToString();
-                FormShipmentDetails detailsForm = new FormShipmentDetails(shipmentId, shipmentNumber);
-                detailsForm.ShowDialog();
-            }
-            else
-            {
-                MessageBox.Show("Выберите отгрузку", "Внимание",
+                MessageBox.Show(Constants.Messages.SelectItem, Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+
+            var shipmentId = Convert.ToInt32(dgvShipments.CurrentRow.Cells["Id"].Value);
+            var shipmentNumber = dgvShipments.CurrentRow.Cells["ShipmentNumber"].Value.ToString();
+            var detailsForm = new FormShipmentDetails(shipmentId, shipmentNumber);
+            detailsForm.ShowDialog();
         }
     }
 }

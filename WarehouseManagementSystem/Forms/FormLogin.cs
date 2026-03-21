@@ -2,9 +2,8 @@
 using System.Data;
 using Npgsql;
 using System.Windows.Forms;
-using WarehouseManagementSystem.Models;
 using WarehouseManagementSystem.Helpers;
-using WarehouseManagementSystem.Forms;
+using WarehouseManagementSystem.Models;
 
 namespace WarehouseManagementSystem.Forms
 {
@@ -13,32 +12,36 @@ namespace WarehouseManagementSystem.Forms
         public FormLogin()
         {
             InitializeComponent();
+            InitializeEvents();
+        }
 
-            this.btnLogin.Click += new EventHandler(this.btnLogin_Click);
-            this.lnkRegister.LinkClicked += new LinkLabelLinkClickedEventHandler(this.lnkRegister_LinkClicked);
+        private void InitializeEvents()
+        {
+            btnLogin.Click += btnLogin_Click;
+            lnkRegister.LinkClicked += lnkRegister_LinkClicked;
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            string email = txtEmail.Text.Trim();
-            string password = txtPassword.Text;
+            var email = txtEmail.Text.Trim();
+            var password = txtPassword.Text;
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Введите email и пароль", "Ошибка",
+                MessageBox.Show(Constants.Messages.FillAllFields, Constants.FormTitles.Login,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                string sql = "SELECT Id, FullName, Role FROM Users WHERE Email = @Email AND PasswordHash = @Password";
-                NpgsqlParameter[] parameters = {
+                var parameters = new[]
+                {
                     new NpgsqlParameter("@Email", email),
                     new NpgsqlParameter("@Password", password)
                 };
 
-                DataTable result = DatabaseHelper.ExecuteQuery(sql, parameters);
+                var result = DatabaseHelper.ExecuteQuery(Constants.Queries.GetUserByEmail, parameters);
 
                 if (result.Rows.Count > 0)
                 {
@@ -50,36 +53,36 @@ namespace WarehouseManagementSystem.Forms
                         Role = result.Rows[0]["Role"].ToString()
                     };
 
-                    this.Hide();
+                    AppLogger.Info($"Пользователь {email} вошел в систему");
+                    Hide();
 
-                    if (Session.CurrentUser.Role == "Admin")
+                    if (Session.CurrentUser.Role == Constants.Roles.Admin)
                     {
-                        FormAdminMain adminForm = new FormAdminMain();
-                        adminForm.Show();
+                        new FormAdminMain().Show();
                     }
                     else
                     {
-                        FormStorekeeperMain storekeeperForm = new FormStorekeeperMain();
-                        storekeeperForm.Show();
+                        new FormStorekeeperMain().Show();
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Неверный email или пароль", "Ошибка",
+                    MessageBox.Show(Constants.Messages.LoginError, Constants.FormTitles.Login,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    AppLogger.Warn($"Неудачная попытка входа: {email}");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка: " + ex.Message, "Ошибка",
+                AppLogger.Error(ex, "Ошибка при входе в систему");
+                MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Login,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void lnkRegister_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            FormRegistration regForm = new FormRegistration();
-            regForm.ShowDialog();
+            new FormRegistration().ShowDialog();
         }
     }
 }

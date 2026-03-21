@@ -1,34 +1,49 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
-using WarehouseManagementSystem.Models;
 
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormStorekeeperMain : Form
     {
-        private Form currentChildForm;
+        private Form _currentChildForm;
 
         public FormStorekeeperMain()
         {
             InitializeComponent();
-            this.btnExit.Click += new EventHandler(this.btnExit_Click);
-            this.остаткиToolStripMenuItem.Click += new EventHandler(this.остаткиToolStripMenuItem_Click);
-            this.отгрузкиToolStripMenuItem.Click += new EventHandler(this.отгрузкиToolStripMenuItem_Click);
-            this.новаяОтгрузкаToolStripMenuItem.Click += new EventHandler(this.новаяОтгрузкаToolStripMenuItem_Click);
+            InitializeEvents();
+            SetupForm();
         }
 
-        private void FormStorekeeperMain_Load(object sender, EventArgs e)
+        private void InitializeEvents()
         {
-            this.Text = "Складская система - Кладовщик";
+            btnExit.Click += btnExit_Click;
+            остаткиToolStripMenuItem.Click += остаткиToolStripMenuItem_Click;
+            отгрузкиToolStripMenuItem.Click += отгрузкиToolStripMenuItem_Click;
+            новаяОтгрузкаToolStripMenuItem.Click += новаяОтгрузкаToolStripMenuItem_Click;
+        }
+
+        private void SetupForm()
+        {
+            Text = Constants.FormTitles.StorekeeperMain;
+            WindowState = FormWindowState.Maximized;
+
+            btnExit.FlatStyle = FlatStyle.Flat;
+            btnExit.FlatAppearance.BorderColor = Color.Black;
+            btnExit.FlatAppearance.BorderSize = 1;
+            btnExit.BackColor = Color.White;
+            btnExit.Text = Constants.ButtonText.Exit;
+
+            menuStrip.BackColor = SystemColors.Control;
         }
 
         private void OpenChildForm(Form childForm)
         {
-            if (currentChildForm != null)
-                currentChildForm.Close();
+            if (_currentChildForm != null)
+                _currentChildForm.Close();
 
-            currentChildForm = childForm;
+            _currentChildForm = childForm;
             childForm.TopLevel = false;
             childForm.FormBorderStyle = FormBorderStyle.None;
             childForm.Dock = DockStyle.Fill;
@@ -40,24 +55,22 @@ namespace WarehouseManagementSystem.Forms
 
         private void остаткиToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormStockBalances stockForm = new FormStockBalances();
-            OpenChildForm(stockForm);
+            OpenChildForm(new FormStockBalances());
         }
 
         private void отгрузкиToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormShipmentHistory historyForm = new FormShipmentHistory(true);
-            OpenChildForm(historyForm);
+            OpenChildForm(new FormShipmentHistory(true));
         }
 
         private void новаяОтгрузкаToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormNewShipment newShipmentForm = new FormNewShipment();
-            OpenChildForm(newShipmentForm);
+            OpenChildForm(new FormNewShipment());
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+            AppLogger.Info("Завершение работы приложения");
             Application.Exit();
         }
     }

@@ -128,7 +128,7 @@
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.Name = "FormStorekeeperMain";
-            this.Load += new System.EventHandler(this.FormStorekeeperMain_Load);
+          //  this.Load += new System.EventHandler(this.FormStorekeeperMain_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.panelContent.ResumeLayout(false);

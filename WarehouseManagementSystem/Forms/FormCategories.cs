@@ -11,60 +11,70 @@ namespace WarehouseManagementSystem.Forms
         public FormCategories()
         {
             InitializeComponent();
-            this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
-            this.dgvCategories.CellClick += new DataGridViewCellEventHandler(this.dgvCategories_CellClick);
+            InitializeEvents();
             LoadCategories();
+        }
+
+        private void InitializeEvents()
+        {
+            btnAdd.Click += btnAdd_Click;
+            dgvCategories.CellClick += dgvCategories_CellClick;
         }
 
         private void LoadCategories()
         {
             try
             {
-                string sql = @"SELECT c.Id, c.Name, c.Description, COUNT(p.Id) as ProductsCount
-                              FROM Categories c
-                              LEFT JOIN Products p ON c.Id = p.CategoryId
-                              GROUP BY c.Id, c.Name, c.Description
-                              ORDER BY c.Name";
-
-                DataTable data = DatabaseHelper.ExecuteQuery(sql);
+                var data = DatabaseHelper.ExecuteQuery(Constants.Queries.GetCategoriesWithCount);
                 dgvCategories.DataSource = data;
 
-                if (dgvCategories.Columns.Contains("Id"))
-                    dgvCategories.Columns["Id"].Visible = false;
-                if (dgvCategories.Columns.Contains("Name"))
-                    dgvCategories.Columns["Name"].HeaderText = "Название категории";
-                if (dgvCategories.Columns.Contains("Description"))
-                    dgvCategories.Columns["Description"].HeaderText = "Описание";
-                if (dgvCategories.Columns.Contains("ProductsCount"))
-                    dgvCategories.Columns["ProductsCount"].HeaderText = "Товаров";
-
-                if (!dgvCategories.Columns.Contains("btnEdit"))
-                {
-                    DataGridViewButtonColumn editCol = new DataGridViewButtonColumn();
-                    editCol.Name = "btnEdit";
-                    editCol.HeaderText = "Действия";
-                    editCol.Text = "Изменить";
-                    editCol.UseColumnTextForButtonValue = true;
-                    dgvCategories.Columns.Add(editCol);
-
-                    DataGridViewButtonColumn deleteCol = new DataGridViewButtonColumn();
-                    deleteCol.Name = "btnDelete";
-                    deleteCol.Text = "Удалить";
-                    deleteCol.UseColumnTextForButtonValue = true;
-                    dgvCategories.Columns.Add(deleteCol);
-                }
-
-                dgvCategories.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                ConfigureGrid();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AppLogger.Error(ex, "Ошибка загрузки категорий");
+                MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Categories,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void ConfigureGrid()
+        {
+            if (dgvCategories.Columns.Contains("Id"))
+                dgvCategories.Columns["Id"].Visible = false;
+            if (dgvCategories.Columns.Contains("Name"))
+                dgvCategories.Columns["Name"].HeaderText = Constants.GridHeaders.Category;
+            if (dgvCategories.Columns.Contains("Description"))
+                dgvCategories.Columns["Description"].HeaderText = Constants.GridHeaders.Description;
+            if (dgvCategories.Columns.Contains("ProductsCount"))
+                dgvCategories.Columns["ProductsCount"].HeaderText = Constants.GridHeaders.ProductsCount;
+
+            if (!dgvCategories.Columns.Contains("btnEdit"))
+            {
+                var editCol = new DataGridViewButtonColumn
+                {
+                    Name = "btnEdit",
+                    HeaderText = Constants.GridHeaders.Actions,
+                    Text = Constants.ButtonText.Edit,
+                    UseColumnTextForButtonValue = true
+                };
+                dgvCategories.Columns.Add(editCol);
+
+                var deleteCol = new DataGridViewButtonColumn
+                {
+                    Name = "btnDelete",
+                    Text = Constants.ButtonText.Delete,
+                    UseColumnTextForButtonValue = true
+                };
+                dgvCategories.Columns.Add(deleteCol);
+            }
+
+            dgvCategories.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            FormCategoryEdit editForm = new FormCategoryEdit();
+            var editForm = new FormCategoryEdit();
             if (editForm.ShowDialog() == DialogResult.OK)
                 LoadCategories();
         }
@@ -73,40 +83,44 @@ namespace WarehouseManagementSystem.Forms
         {
             if (e.RowIndex < 0) return;
 
-            int id = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["Id"].Value);
-            string name = dgvCategories.Rows[e.RowIndex].Cells["Name"].Value.ToString();
-            string description = dgvCategories.Rows[e.RowIndex].Cells["Description"].Value?.ToString();
+            var id = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["Id"].Value);
+            var name = dgvCategories.Rows[e.RowIndex].Cells["Name"].Value.ToString();
+            var description = dgvCategories.Rows[e.RowIndex].Cells["Description"].Value?.ToString();
 
             if (dgvCategories.Columns[e.ColumnIndex].Name == "btnEdit")
             {
-                FormCategoryEdit editForm = new FormCategoryEdit(id, name, description);
+                var editForm = new FormCategoryEdit(id, name, description);
                 if (editForm.ShowDialog() == DialogResult.OK)
                     LoadCategories();
             }
             else if (dgvCategories.Columns[e.ColumnIndex].Name == "btnDelete")
             {
-                int productCount = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["ProductsCount"].Value);
+                var productCount = Convert.ToInt32(dgvCategories.Rows[e.RowIndex].Cells["ProductsCount"].Value);
 
                 if (productCount > 0)
                 {
-                    MessageBox.Show($"Нельзя удалить категорию '{name}', так как в ней есть товары",
-                        "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(Constants.Messages.CategoryHasProducts, Constants.FormTitles.Categories,
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                if (MessageBox.Show($"Удалить категорию '{name}'?", "Подтверждение",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                var confirm = MessageBox.Show($"Удалить категорию '{name}'? {Constants.Messages.DeleteConfirm}",
+                    "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (confirm != DialogResult.Yes) return;
+
+                try
                 {
-                    try
-                    {
-                        string deleteSql = "DELETE FROM Categories WHERE Id = @Id";
-                        DatabaseHelper.ExecuteNonQuery(deleteSql, new[] { new NpgsqlParameter("@Id", id) });
-                        LoadCategories();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    var parameters = new[] { new NpgsqlParameter("@Id", id) };
+                    DatabaseHelper.ExecuteNonQuery("DELETE FROM Categories WHERE Id = @Id", parameters);
+                    AppLogger.Info($"Удалена категория: {name}");
+                    LoadCategories();
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.Error(ex, "Ошибка удаления категории");
+                    MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Categories,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

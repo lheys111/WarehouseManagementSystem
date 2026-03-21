@@ -10,65 +10,61 @@ namespace WarehouseManagementSystem.Forms
 {
     public partial class FormNewShipment : Form
     {
-        private DataTable cartTable;
-        private string shipmentNumber;
+        private DataTable _cartTable;
+        private string _shipmentNumber;
 
         public FormNewShipment()
         {
             InitializeComponent();
-
-            // Привязка событий
-            this.btnAddItem.Click += new EventHandler(this.btnAddItem_Click);
-            this.btnRemoveItem.Click += new EventHandler(this.btnRemoveItem_Click);
-            this.btnRefreshStock.Click += new EventHandler(this.btnRefreshStock_Click);
-            this.btnConfirm.Click += new EventHandler(this.btnConfirm_Click);
-
+            InitializeEvents();
             InitializeCart();
             LoadStock();
             GenerateShipmentNumber();
             lblDate.Text = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
             SetupButtons();
+            Text = Constants.FormTitles.NewShipment;
+        }
+
+        private void InitializeEvents()
+        {
+            btnAddItem.Click += btnAddItem_Click;
+            btnRemoveItem.Click += btnRemoveItem_Click;
+            btnRefreshStock.Click += btnRefreshStock_Click;
+            btnConfirm.Click += btnConfirm_Click;
         }
 
         private void SetupButtons()
         {
-            btnAddItem.FlatStyle = FlatStyle.Flat;
-            btnAddItem.FlatAppearance.BorderColor = Color.Black;
-            btnAddItem.FlatAppearance.BorderSize = 1;
-            btnAddItem.BackColor = Color.White;
-
-            btnRemoveItem.FlatStyle = FlatStyle.Flat;
-            btnRemoveItem.FlatAppearance.BorderColor = Color.Black;
-            btnRemoveItem.FlatAppearance.BorderSize = 1;
-            btnRemoveItem.BackColor = Color.White;
-
-            btnRefreshStock.FlatStyle = FlatStyle.Flat;
-            btnRefreshStock.FlatAppearance.BorderColor = Color.Black;
-            btnRefreshStock.FlatAppearance.BorderSize = 1;
-            btnRefreshStock.BackColor = Color.White;
-
-            btnConfirm.FlatStyle = FlatStyle.Flat;
-            btnConfirm.FlatAppearance.BorderColor = Color.Black;
-            btnConfirm.FlatAppearance.BorderSize = 1;
-            btnConfirm.BackColor = Color.White;
+            var buttons = new[] { btnAddItem, btnRemoveItem, btnRefreshStock, btnConfirm };
+            foreach (var btn in buttons)
+            {
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderColor = Color.Black;
+                btn.FlatAppearance.BorderSize = 1;
+                btn.BackColor = Color.White;
+            }
             btnConfirm.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Bold);
+            btnAddItem.Text = Constants.ButtonText.AddItem;
+            btnRemoveItem.Text = Constants.ButtonText.RemoveItem;
+            btnRefreshStock.Text = Constants.ButtonText.Refresh;
+            btnConfirm.Text = Constants.ButtonText.Confirm;
         }
 
         private void InitializeCart()
         {
-            cartTable = new DataTable();
-            cartTable.Columns.Add("ProductId", typeof(int));
-            cartTable.Columns.Add("Article", typeof(string));
-            cartTable.Columns.Add("Name", typeof(string));
-            cartTable.Columns.Add("Quantity", typeof(decimal));
-            cartTable.Columns.Add("Price", typeof(decimal));
-            dgvCart.DataSource = cartTable;
+            _cartTable = new DataTable();
+            _cartTable.Columns.Add("ProductId", typeof(int));
+            _cartTable.Columns.Add("Article", typeof(string));
+            _cartTable.Columns.Add("Name", typeof(string));
+            _cartTable.Columns.Add("Quantity", typeof(decimal));
+            _cartTable.Columns.Add("Price", typeof(decimal));
+            dgvCart.DataSource = _cartTable;
 
             dgvCart.Columns["ProductId"].Visible = false;
-            dgvCart.Columns["Article"].HeaderText = "Артикул";
-            dgvCart.Columns["Name"].HeaderText = "Название";
-            dgvCart.Columns["Quantity"].HeaderText = "Кол-во";
-            dgvCart.Columns["Price"].HeaderText = "Цена";
+            dgvCart.Columns["Article"].HeaderText = Constants.GridHeaders.Article;
+            dgvCart.Columns["Name"].HeaderText = Constants.GridHeaders.Name;
+            dgvCart.Columns["Quantity"].HeaderText = Constants.GridHeaders.Quantity;
+            dgvCart.Columns["Price"].HeaderText = Constants.GridHeaders.Price;
             dgvCart.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
@@ -76,24 +72,25 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                string sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
-                              FROM vw_ProductsWithStock
-                              WHERE StockQuantity > 0
-                              ORDER BY Name";
-                DataTable data = DatabaseHelper.ExecuteQuery(sql);
+                var sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
+                           FROM vw_ProductsWithStock
+                           WHERE StockQuantity > 0
+                           ORDER BY Name";
+                var data = DatabaseHelper.ExecuteQuery(sql);
                 dgvStock.DataSource = data;
 
                 dgvStock.Columns["Id"].Visible = false;
-                dgvStock.Columns["Article"].HeaderText = "Артикул";
-                dgvStock.Columns["Name"].HeaderText = "Название";
-                dgvStock.Columns["UnitOfMeasure"].HeaderText = "Ед. изм.";
-                dgvStock.Columns["StockQuantity"].HeaderText = "Остаток";
-                dgvStock.Columns["PurchasePrice"].HeaderText = "Цена";
+                dgvStock.Columns["Article"].HeaderText = Constants.GridHeaders.Article;
+                dgvStock.Columns["Name"].HeaderText = Constants.GridHeaders.Name;
+                dgvStock.Columns["UnitOfMeasure"].HeaderText = Constants.GridHeaders.Unit;
+                dgvStock.Columns["StockQuantity"].HeaderText = Constants.GridHeaders.Stock;
+                dgvStock.Columns["PurchasePrice"].HeaderText = Constants.GridHeaders.Price;
                 dgvStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки остатков: " + ex.Message, "Ошибка",
+                AppLogger.Error(ex, "Ошибка загрузки остатков");
+                MessageBox.Show(Constants.Messages.ConnectionError, Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -102,55 +99,45 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                string sql = "SELECT generate_shipment_number()";
-                shipmentNumber = DatabaseHelper.ExecuteScalar(sql).ToString();
-                lblDocNumber.Text = $"Номер документа: {shipmentNumber}";
+                _shipmentNumber = DatabaseHelper.ExecuteScalar(Constants.Queries.GenerateShipmentNumber).ToString();
+                lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
             }
             catch
             {
-                shipmentNumber = $"INV-{DateTime.Now:yyyyMMdd}-001";
-                lblDocNumber.Text = $"Номер документа: {shipmentNumber}";
+                _shipmentNumber = $"INV-{DateTime.Now:yyyyMMdd}-001";
+                lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
             }
         }
 
         private void btnAddItem_Click(object sender, EventArgs e)
         {
-            // Тестовое сообщение
-            MessageBox.Show("Кнопка Добавить сработала!", "Тест");
-
             if (dgvStock.CurrentRow == null)
             {
-                MessageBox.Show("Выберите товар из списка остатков", "Внимание",
+                MessageBox.Show("Выберите товар из списка остатков", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            int productId = Convert.ToInt32(dgvStock.CurrentRow.Cells["Id"].Value);
-            string article = dgvStock.CurrentRow.Cells["Article"].Value.ToString();
-            string name = dgvStock.CurrentRow.Cells["Name"].Value.ToString();
-            decimal stockQuantity = Convert.ToDecimal(dgvStock.CurrentRow.Cells["StockQuantity"].Value);
-            decimal price = Convert.ToDecimal(dgvStock.CurrentRow.Cells["PurchasePrice"].Value);
+            var productId = Convert.ToInt32(dgvStock.CurrentRow.Cells["Id"].Value);
+            var article = dgvStock.CurrentRow.Cells["Article"].Value.ToString();
+            var name = dgvStock.CurrentRow.Cells["Name"].Value.ToString();
+            var stockQuantity = Convert.ToDecimal(dgvStock.CurrentRow.Cells["StockQuantity"].Value);
+            var price = Convert.ToDecimal(dgvStock.CurrentRow.Cells["PurchasePrice"].Value);
 
-            FormSelectProduct selectForm = new FormSelectProduct(productId, article, name, stockQuantity, price);
+            var selectForm = new FormSelectProduct(productId, article, name, stockQuantity, price);
             if (selectForm.ShowDialog() == DialogResult.OK)
             {
                 var selected = selectForm.SelectedProduct;
 
-                DataRow[] existing = cartTable.Select($"ProductId = {selected.ProductId}");
+                var existing = _cartTable.Select($"ProductId = {selected.ProductId}");
                 if (existing.Length > 0)
                 {
-                    MessageBox.Show("Этот товар уже добавлен в отгрузку", "Внимание",
+                    MessageBox.Show("Этот товар уже добавлен в отгрузку", Text,
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                cartTable.Rows.Add(
-                    selected.ProductId,
-                    selected.Article,
-                    selected.Name,
-                    selected.Quantity,
-                    selected.Price
-                );
+                _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, selected.Price);
             }
         }
 
@@ -158,11 +145,11 @@ namespace WarehouseManagementSystem.Forms
         {
             if (dgvCart.CurrentRow != null)
             {
-                cartTable.Rows.Remove(dgvCart.CurrentRow.DataBoundItem as DataRow);
+                _cartTable.Rows.Remove(dgvCart.CurrentRow.DataBoundItem as DataRow);
             }
             else
             {
-                MessageBox.Show("Выберите позицию для удаления", "Внимание",
+                MessageBox.Show("Выберите позицию для удаления", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
@@ -170,22 +157,23 @@ namespace WarehouseManagementSystem.Forms
         private void btnRefreshStock_Click(object sender, EventArgs e)
         {
             LoadStock();
-            MessageBox.Show("Список остатков обновлен", "Обновление",
+            MessageBox.Show("Список остатков обновлен", Text,
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnConfirm_Click(object sender, EventArgs e)
         {
-            if (cartTable.Rows.Count == 0)
+            if (_cartTable.Rows.Count == 0)
             {
-                MessageBox.Show("Добавьте товары в отгрузку", "Внимание",
+                MessageBox.Show("Добавьте товары в отгрузку", Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (MessageBox.Show("Подтвердить отгрузку? Товары будут списаны со склада.",
-                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-                return;
+            var confirm = MessageBox.Show(Constants.Messages.ShipmentConfirm, "Подтверждение",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
 
             try
             {
@@ -194,26 +182,26 @@ namespace WarehouseManagementSystem.Forms
                     conn.Open();
                     using (var tran = conn.BeginTransaction())
                     {
-                        string shipmentSql = @"INSERT INTO Shipments (ShipmentNumber, ShipmentDate, StorekeeperId, Status) 
-                                              VALUES (@Number, @Date, @StorekeeperId, 'Completed') RETURNING Id";
+                        var shipmentSql = @"INSERT INTO Shipments (ShipmentNumber, ShipmentDate, StorekeeperId, Status) 
+                                           VALUES (@Number, @Date, @StorekeeperId, 'Completed') RETURNING Id";
                         using (var cmd = new NpgsqlCommand(shipmentSql, conn, tran))
                         {
-                            cmd.Parameters.AddWithValue("@Number", shipmentNumber);
+                            cmd.Parameters.AddWithValue("@Number", _shipmentNumber);
                             cmd.Parameters.AddWithValue("@Date", DateTime.Now);
                             cmd.Parameters.AddWithValue("@StorekeeperId", Session.CurrentUser.Id);
-                            int shipmentId = Convert.ToInt32(cmd.ExecuteScalar());
+                            var shipmentId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                            foreach (DataRow row in cartTable.Rows)
+                            foreach (DataRow row in _cartTable.Rows)
                             {
-                                int productId = Convert.ToInt32(row["ProductId"]);
-                                decimal quantity = Convert.ToDecimal(row["Quantity"]);
-                                decimal price = Convert.ToDecimal(row["Price"]);
+                                var productId = Convert.ToInt32(row["ProductId"]);
+                                var quantity = Convert.ToDecimal(row["Quantity"]);
+                                var price = Convert.ToDecimal(row["Price"]);
 
-                                string checkSql = "SELECT Quantity FROM StockBalances WHERE ProductId = @ProductId";
+                                var checkSql = "SELECT Quantity FROM StockBalances WHERE ProductId = @ProductId";
                                 using (var checkCmd = new NpgsqlCommand(checkSql, conn, tran))
                                 {
                                     checkCmd.Parameters.AddWithValue("@ProductId", productId);
-                                    decimal stock = Convert.ToDecimal(checkCmd.ExecuteScalar());
+                                    var stock = Convert.ToDecimal(checkCmd.ExecuteScalar());
 
                                     if (stock < quantity)
                                     {
@@ -221,8 +209,8 @@ namespace WarehouseManagementSystem.Forms
                                     }
                                 }
 
-                                string detailSql = @"INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment) 
-                                                    VALUES (@ShipmentId, @ProductId, @Quantity, @Price)";
+                                var detailSql = @"INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment) 
+                                                 VALUES (@ShipmentId, @ProductId, @Quantity, @Price)";
                                 using (var detailCmd = new NpgsqlCommand(detailSql, conn, tran))
                                 {
                                     detailCmd.Parameters.AddWithValue("@ShipmentId", shipmentId);
@@ -232,7 +220,7 @@ namespace WarehouseManagementSystem.Forms
                                     detailCmd.ExecuteNonQuery();
                                 }
 
-                                string stockSql = "UPDATE StockBalances SET Quantity = Quantity - @Quantity, UpdatedAt = CURRENT_TIMESTAMP WHERE ProductId = @ProductId";
+                                var stockSql = "UPDATE StockBalances SET Quantity = Quantity - @Quantity, UpdatedAt = CURRENT_TIMESTAMP WHERE ProductId = @ProductId";
                                 using (var stockCmd = new NpgsqlCommand(stockSql, conn, tran))
                                 {
                                     stockCmd.Parameters.AddWithValue("@Quantity", quantity);
@@ -240,22 +228,23 @@ namespace WarehouseManagementSystem.Forms
                                     stockCmd.ExecuteNonQuery();
                                 }
                             }
-
                             tran.Commit();
                         }
                     }
                 }
 
-                MessageBox.Show($"Отгрузка №{shipmentNumber} успешно проведена!\nТовары списаны со склада.",
+                AppLogger.Info($"Проведена отгрузка №{_shipmentNumber}");
+                MessageBox.Show($"{Constants.Messages.ShipmentSuccess} №{_shipmentNumber}!",
                     "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                cartTable.Clear();
+                _cartTable.Clear();
                 GenerateShipmentNumber();
                 LoadStock();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при проведении отгрузки: " + ex.Message, "Ошибка",
+                AppLogger.Error(ex, "Ошибка проведения отгрузки");
+                MessageBox.Show(Constants.Messages.ConnectionError, Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
