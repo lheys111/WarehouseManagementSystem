@@ -50,7 +50,7 @@
             this.документыToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(667, 28);
+            this.menuStrip.Size = new System.Drawing.Size(1013, 28);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -93,7 +93,7 @@
             // 
             this.btnExit.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Location = new System.Drawing.Point(592, 0);
+            this.btnExit.Location = new System.Drawing.Point(926, 0);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(75, 23);
             this.btnExit.TabIndex = 1;
@@ -106,13 +106,13 @@
             this.panelContent.Controls.Add(this.label1);
             this.panelContent.Location = new System.Drawing.Point(12, 68);
             this.panelContent.Name = "panelContent";
-            this.panelContent.Size = new System.Drawing.Size(643, 375);
+            this.panelContent.Size = new System.Drawing.Size(989, 519);
             this.panelContent.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(242, 168);
+            this.label1.Location = new System.Drawing.Point(420, 263);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(161, 16);
             this.label1.TabIndex = 0;
@@ -122,7 +122,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(667, 450);
+            this.ClientSize = new System.Drawing.Size(1013, 648);
             this.Controls.Add(this.panelContent);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.menuStrip);

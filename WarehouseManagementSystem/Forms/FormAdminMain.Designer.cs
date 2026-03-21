@@ -46,7 +46,7 @@
             this.администрированиеToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1349, 30);
+            this.menuStrip.Size = new System.Drawing.Size(1349, 28);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip";
             // 
@@ -95,7 +95,7 @@
             this.btnExit.Location = new System.Drawing.Point(1244, 0);
             this.btnExit.Margin = new System.Windows.Forms.Padding(4);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(92, 23);
+            this.btnExit.Size = new System.Drawing.Size(92, 32);
             this.btnExit.TabIndex = 1;
             this.btnExit.Text = "ВЫХОД";
             this.btnExit.UseVisualStyleBackColor = false;

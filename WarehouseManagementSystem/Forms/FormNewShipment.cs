@@ -1,5 +1,4 @@
-﻿
-using Npgsql;
+﻿using Npgsql;
 using System;
 using System.Data;
 using System.Drawing;
@@ -17,10 +16,13 @@ namespace WarehouseManagementSystem.Forms
         public FormNewShipment()
         {
             InitializeComponent();
+
+            // Привязка событий
             this.btnAddItem.Click += new EventHandler(this.btnAddItem_Click);
             this.btnRemoveItem.Click += new EventHandler(this.btnRemoveItem_Click);
             this.btnRefreshStock.Click += new EventHandler(this.btnRefreshStock_Click);
             this.btnConfirm.Click += new EventHandler(this.btnConfirm_Click);
+
             InitializeCart();
             LoadStock();
             GenerateShipmentNumber();
@@ -113,6 +115,9 @@ namespace WarehouseManagementSystem.Forms
 
         private void btnAddItem_Click(object sender, EventArgs e)
         {
+            // Тестовое сообщение
+            MessageBox.Show("Кнопка Добавить сработала!", "Тест");
+
             if (dgvStock.CurrentRow == null)
             {
                 MessageBox.Show("Выберите товар из списка остатков", "Внимание",
@@ -256,4 +261,3 @@ namespace WarehouseManagementSystem.Forms
         }
     }
 }
-

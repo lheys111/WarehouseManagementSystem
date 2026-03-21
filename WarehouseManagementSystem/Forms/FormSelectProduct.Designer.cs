@@ -54,7 +54,7 @@
             // txtQuantity
             // 
             this.txtQuantity.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.txtQuantity.Location = new System.Drawing.Point(132, 362);
+            this.txtQuantity.Location = new System.Drawing.Point(87, 362);
             this.txtQuantity.Name = "txtQuantity";
             this.txtQuantity.Size = new System.Drawing.Size(199, 22);
             this.txtQuantity.TabIndex = 1;
@@ -62,9 +62,9 @@
             // btnSearch
             // 
             this.btnSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.btnSearch.Location = new System.Drawing.Point(298, 93);
+            this.btnSearch.Location = new System.Drawing.Point(298, 87);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(75, 23);
+            this.btnSearch.Size = new System.Drawing.Size(75, 37);
             this.btnSearch.TabIndex = 2;
             this.btnSearch.Text = "Найти";
             this.btnSearch.UseVisualStyleBackColor = false;
@@ -98,17 +98,17 @@
             this.dgvProducts.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.dgvProducts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvProducts.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.dgvProducts.Location = new System.Drawing.Point(87, 136);
+            this.dgvProducts.Location = new System.Drawing.Point(48, 136);
             this.dgvProducts.Name = "dgvProducts";
             this.dgvProducts.RowHeadersWidth = 51;
             this.dgvProducts.RowTemplate.Height = 24;
-            this.dgvProducts.Size = new System.Drawing.Size(286, 174);
+            this.dgvProducts.Size = new System.Drawing.Size(380, 179);
             this.dgvProducts.TabIndex = 5;
             // 
             // lblQuantity
             // 
             this.lblQuantity.AutoSize = true;
-            this.lblQuantity.Location = new System.Drawing.Point(129, 343);
+            this.lblQuantity.Location = new System.Drawing.Point(84, 343);
             this.lblQuantity.Name = "lblQuantity";
             this.lblQuantity.Size = new System.Drawing.Size(88, 16);
             this.lblQuantity.TabIndex = 6;

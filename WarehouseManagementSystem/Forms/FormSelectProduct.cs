@@ -27,8 +27,10 @@ namespace WarehouseManagementSystem.Forms
         public FormSelectProduct()
         {
             InitializeComponent();
-            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
+
+          
             this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
+            this.btnSearch.Click += new EventHandler(this.btnSearch_Click);
             this.btnCancel.Click += new EventHandler(this.btnCancel_Click);
             this.dgvProducts.SelectionChanged += new EventHandler(this.dgvProducts_SelectionChanged);
             this.txtQuantity.TextChanged += new EventHandler(this.txtQuantity_TextChanged);
@@ -192,6 +194,8 @@ namespace WarehouseManagementSystem.Forms
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
+            
+
             if (selectedProductId == -1)
             {
                 MessageBox.Show("Выберите товар из списка", "Ошибка",
@@ -252,7 +256,7 @@ namespace WarehouseManagementSystem.Forms
         {
             if (e.RowIndex >= 0)
             {
-                btnAdd.PerformClick();
+                btnAdd_Click(sender, e);
             }
         }
     }

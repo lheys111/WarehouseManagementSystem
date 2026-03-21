@@ -36,9 +36,9 @@
             // 
             // txtSearch
             // 
-            this.txtSearch.Location = new System.Drawing.Point(60, 48);
+            this.txtSearch.Location = new System.Drawing.Point(36, 48);
             this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(100, 22);
+            this.txtSearch.Size = new System.Drawing.Size(159, 22);
             this.txtSearch.TabIndex = 0;
             // 
             // btnSearch
@@ -52,12 +52,13 @@
             // 
             // dgvStock
             // 
+            this.dgvStock.BackgroundColor = System.Drawing.SystemColors.Control;
             this.dgvStock.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvStock.Location = new System.Drawing.Point(36, 90);
             this.dgvStock.Name = "dgvStock";
             this.dgvStock.RowHeadersWidth = 51;
             this.dgvStock.RowTemplate.Height = 24;
-            this.dgvStock.Size = new System.Drawing.Size(240, 150);
+            this.dgvStock.Size = new System.Drawing.Size(499, 284);
             this.dgvStock.TabIndex = 2;
             // 
             // FormStockBalances

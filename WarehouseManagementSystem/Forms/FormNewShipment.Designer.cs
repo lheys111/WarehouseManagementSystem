@@ -51,7 +51,7 @@
             this.panel1.Controls.Add(this.lblDocNumber);
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(801, 37);
+            this.panel1.Size = new System.Drawing.Size(1040, 37);
             this.panel1.TabIndex = 0;
             // 
             // lblDate
@@ -76,7 +76,7 @@
             // 
             this.btnRefreshStock.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnRefreshStock.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRefreshStock.Location = new System.Drawing.Point(659, 344);
+            this.btnRefreshStock.Location = new System.Drawing.Point(865, 461);
             this.btnRefreshStock.Name = "btnRefreshStock";
             this.btnRefreshStock.Size = new System.Drawing.Size(95, 28);
             this.btnRefreshStock.TabIndex = 3;
@@ -87,7 +87,7 @@
             // 
             this.btnAddItem.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnAddItem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddItem.Location = new System.Drawing.Point(48, 344);
+            this.btnAddItem.Location = new System.Drawing.Point(48, 461);
             this.btnAddItem.Name = "btnAddItem";
             this.btnAddItem.Size = new System.Drawing.Size(100, 28);
             this.btnAddItem.TabIndex = 4;
@@ -102,25 +102,25 @@
             this.dgvCart.Name = "dgvCart";
             this.dgvCart.RowHeadersWidth = 51;
             this.dgvCart.RowTemplate.Height = 24;
-            this.dgvCart.Size = new System.Drawing.Size(327, 236);
+            this.dgvCart.Size = new System.Drawing.Size(449, 330);
             this.dgvCart.TabIndex = 5;
             // 
             // dgvStock
             // 
             this.dgvStock.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.dgvStock.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvStock.Location = new System.Drawing.Point(490, 87);
+            this.dgvStock.Location = new System.Drawing.Point(523, 87);
             this.dgvStock.Name = "dgvStock";
             this.dgvStock.RowHeadersWidth = 51;
             this.dgvStock.RowTemplate.Height = 24;
-            this.dgvStock.Size = new System.Drawing.Size(264, 236);
+            this.dgvStock.Size = new System.Drawing.Size(437, 330);
             this.dgvStock.TabIndex = 6;
             // 
             // btnRemoveItem
             // 
             this.btnRemoveItem.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnRemoveItem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRemoveItem.Location = new System.Drawing.Point(201, 344);
+            this.btnRemoveItem.Location = new System.Drawing.Point(188, 461);
             this.btnRemoveItem.Name = "btnRemoveItem";
             this.btnRemoveItem.Size = new System.Drawing.Size(98, 28);
             this.btnRemoveItem.TabIndex = 7;
@@ -132,7 +132,7 @@
             this.btnConfirm.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnConfirm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnConfirm.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnConfirm.Location = new System.Drawing.Point(48, 401);
+            this.btnConfirm.Location = new System.Drawing.Point(48, 534);
             this.btnConfirm.Name = "btnConfirm";
             this.btnConfirm.Size = new System.Drawing.Size(327, 26);
             this.btnConfirm.TabIndex = 8;
@@ -142,7 +142,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(487, 68);
+            this.label1.Location = new System.Drawing.Point(520, 68);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(129, 16);
             this.label1.TabIndex = 9;
@@ -161,7 +161,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1041, 605);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnConfirm);
