@@ -8,16 +8,24 @@ namespace WarehouseManagementSystem.Services
     {
         public static string HashPassword(string password)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            using (var sha256 = SHA256.Create())
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(bytes);
+                var bytes = Encoding.UTF8.GetBytes(password);
+                var hashBytes = sha256.ComputeHash(bytes);
+
+                // Преобразуем байты в hex строку (старый способ)
+                var sb = new StringBuilder();
+                foreach (var b in hashBytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
             }
         }
 
         public static bool VerifyPassword(string password, string hash)
         {
-            string computedHash = HashPassword(password);
+            var computedHash = HashPassword(password);
             return computedHash == hash;
         }
     }

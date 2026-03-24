@@ -76,24 +76,24 @@ namespace WarehouseManagementSystem.Helpers
             }
             return false;
         }
-
+        
         public static bool TestConnection()
-        {
-            try
-            {
-                using (var conn = GetConnection())
-                {
-                    conn.Open();
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Error(ex, "Ошибка подключения к базе данных");
-                MessageBox.Show(Constants.Messages.ConnectionError, "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-        }
+         {
+             try
+             {
+                 using (var conn = GetConnection())
+                 {
+                     conn.Open();
+                     return true;
+                 }
+             }
+             catch (Exception ex)
+             {
+                 AppLogger.Error(ex, "Ошибка подключения к базе данных");
+                 MessageBox.Show(Constants.Messages.ConnectionError, "Ошибка",
+                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                 return false;
+             }
+         }
     }
 }

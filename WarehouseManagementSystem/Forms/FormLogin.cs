@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Data;
-using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
+using WarehouseManagementSystem.Services;
 
 namespace WarehouseManagementSystem.Forms
 {
@@ -13,6 +14,7 @@ namespace WarehouseManagementSystem.Forms
         {
             InitializeComponent();
             InitializeEvents();
+            
         }
 
         private void InitializeEvents()

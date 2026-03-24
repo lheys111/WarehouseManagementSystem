@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+using WarehouseManagementSystem.Services;
 
 namespace WarehouseManagementSystem.Forms
 {

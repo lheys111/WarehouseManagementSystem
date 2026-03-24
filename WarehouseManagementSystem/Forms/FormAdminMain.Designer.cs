@@ -137,7 +137,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Складская система - Администратор";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-           // this.Load += new System.EventHandler(this.FormAdminMain_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.panelContent.ResumeLayout(false);
