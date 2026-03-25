@@ -76,7 +76,7 @@
             // 
             this.btnRefreshStock.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnRefreshStock.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRefreshStock.Location = new System.Drawing.Point(865, 461);
+            this.btnRefreshStock.Location = new System.Drawing.Point(865, 423);
             this.btnRefreshStock.Name = "btnRefreshStock";
             this.btnRefreshStock.Size = new System.Drawing.Size(95, 28);
             this.btnRefreshStock.TabIndex = 3;
@@ -87,7 +87,7 @@
             // 
             this.btnAddItem.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnAddItem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddItem.Location = new System.Drawing.Point(48, 461);
+            this.btnAddItem.Location = new System.Drawing.Point(48, 423);
             this.btnAddItem.Name = "btnAddItem";
             this.btnAddItem.Size = new System.Drawing.Size(100, 28);
             this.btnAddItem.TabIndex = 4;
@@ -120,7 +120,7 @@
             // 
             this.btnRemoveItem.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnRemoveItem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRemoveItem.Location = new System.Drawing.Point(188, 461);
+            this.btnRemoveItem.Location = new System.Drawing.Point(185, 423);
             this.btnRemoveItem.Name = "btnRemoveItem";
             this.btnRemoveItem.Size = new System.Drawing.Size(98, 28);
             this.btnRemoveItem.TabIndex = 7;
@@ -132,9 +132,9 @@
             this.btnConfirm.BackColor = System.Drawing.Color.MediumAquamarine;
             this.btnConfirm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnConfirm.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnConfirm.Location = new System.Drawing.Point(48, 534);
+            this.btnConfirm.Location = new System.Drawing.Point(48, 457);
             this.btnConfirm.Name = "btnConfirm";
-            this.btnConfirm.Size = new System.Drawing.Size(327, 26);
+            this.btnConfirm.Size = new System.Drawing.Size(327, 40);
             this.btnConfirm.TabIndex = 8;
             this.btnConfirm.Text = "Провести отгрузку";
             this.btnConfirm.UseVisualStyleBackColor = false;

@@ -30,15 +30,15 @@
         {
             this.lblAvailable = new System.Windows.Forms.Label();
             this.txtQuantity = new System.Windows.Forms.TextBox();
-            this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnAdd = new System.Windows.Forms.Button();
             this.dgvProducts = new System.Windows.Forms.DataGridView();
             this.lblQuantity = new System.Windows.Forms.Label();
-            this.lblSearch = new System.Windows.Forms.Label();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.lblSearch = new System.Windows.Forms.Label();
+            this.btnSearch = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvProducts)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,16 +58,6 @@
             this.txtQuantity.Name = "txtQuantity";
             this.txtQuantity.Size = new System.Drawing.Size(199, 22);
             this.txtQuantity.TabIndex = 1;
-            // 
-            // btnSearch
-            // 
-            this.btnSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.btnSearch.Location = new System.Drawing.Point(298, 87);
-            this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(75, 37);
-            this.btnSearch.TabIndex = 2;
-            this.btnSearch.Text = "Найти";
-            this.btnSearch.UseVisualStyleBackColor = false;
             // 
             // btnCancel
             // 
@@ -114,15 +104,6 @@
             this.lblQuantity.TabIndex = 6;
             this.lblQuantity.Text = "Количество:";
             // 
-            // lblSearch
-            // 
-            this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(84, 75);
-            this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(117, 16);
-            this.lblSearch.TabIndex = 7;
-            this.lblSearch.Text = "Выберите товар:";
-            // 
             // txtSearch
             // 
             this.txtSearch.BackColor = System.Drawing.Color.MediumAquamarine;
@@ -146,6 +127,25 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(475, 39);
             this.panel2.TabIndex = 10;
+            // 
+            // lblSearch
+            // 
+            this.lblSearch.AutoSize = true;
+            this.lblSearch.Location = new System.Drawing.Point(84, 75);
+            this.lblSearch.Name = "lblSearch";
+            this.lblSearch.Size = new System.Drawing.Size(117, 16);
+            this.lblSearch.TabIndex = 7;
+            this.lblSearch.Text = "Выберите товар:";
+            // 
+            // btnSearch
+            // 
+            this.btnSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.btnSearch.Location = new System.Drawing.Point(298, 87);
+            this.btnSearch.Name = "btnSearch";
+            this.btnSearch.Size = new System.Drawing.Size(75, 37);
+            this.btnSearch.TabIndex = 2;
+            this.btnSearch.Text = "Найти";
+            this.btnSearch.UseVisualStyleBackColor = false;
             // 
             // FormSelectProduct
             // 
@@ -174,14 +174,14 @@
 
         private System.Windows.Forms.Label lblAvailable;
         private System.Windows.Forms.TextBox txtQuantity;
-        private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.DataGridView dgvProducts;
         private System.Windows.Forms.Label lblQuantity;
-        private System.Windows.Forms.Label lblSearch;
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Label lblSearch;
+        private System.Windows.Forms.Button btnSearch;
     }
 }

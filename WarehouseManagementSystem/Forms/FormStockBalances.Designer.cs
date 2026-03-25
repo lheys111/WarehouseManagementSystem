@@ -49,7 +49,7 @@
             this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSearch.Location = new System.Drawing.Point(201, 47);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(75, 23);
+            this.btnSearch.Size = new System.Drawing.Size(75, 37);
             this.btnSearch.TabIndex = 1;
             this.btnSearch.Text = "Найти";
             this.btnSearch.UseVisualStyleBackColor = false;

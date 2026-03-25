@@ -1,5 +1,4 @@
-﻿
-using Npgsql;
+﻿using Npgsql;
 using System;
 using System.Data;
 using System.Drawing;
@@ -28,14 +27,14 @@ namespace WarehouseManagementSystem.Forms
         public FormSelectProduct()
         {
             InitializeComponent();
+            InitializeForm();
             LoadProducts();
-            SetupForm();
         }
 
         public FormSelectProduct(int productId, string article, string name, decimal stock, decimal price)
         {
             InitializeComponent();
-            SetupForm();
+            InitializeForm();
 
             _selectedProductId = productId;
             _availableStock = stock;
@@ -49,7 +48,6 @@ namespace WarehouseManagementSystem.Forms
             data.Rows.Add(productId, article, name, stock);
 
             dgvProducts.DataSource = data;
-
             dgvProducts.Columns["Id"].Visible = false;
             dgvProducts.Columns["Article"].HeaderText = "Артикул";
             dgvProducts.Columns["Name"].HeaderText = "Название";
@@ -66,20 +64,21 @@ namespace WarehouseManagementSystem.Forms
 
         public SelectedProductItem SelectedProduct => _selectedProduct;
 
-        private void SetupForm()
+        private void InitializeForm()
         {
             this.Text = "Выбор товара и количества";
             this.StartPosition = FormStartPosition.CenterParent;
 
-            this.btnAdd.Click += BtnAdd_Click;
-            this.btnCancel.Click += BtnCancel_Click;
-            this.btnSearch.Click += BtnSearch_Click;
-            this.dgvProducts.SelectionChanged += DgvProducts_SelectionChanged;
-            this.txtQuantity.TextChanged += TxtQuantity_TextChanged;
-            this.txtQuantity.KeyPress += TxtQuantity_KeyPress;
-            this.dgvProducts.CellDoubleClick += DgvProducts_CellDoubleClick;
+            // Привязка событий
+            btnSearch.Click += BtnSearch_Click;
+            btnAdd.Click += BtnAdd_Click;
+            btnCancel.Click += BtnCancel_Click;
+            //dgvProducts.SelectionChanged += DgvProducts_SelectionChanged;
+            txtQuantity.TextChanged += TxtQuantity_TextChanged;
+            txtQuantity.KeyPress += TxtQuantity_KeyPress;
+            dgvProducts.CellDoubleClick += DgvProducts_CellDoubleClick;
 
-     
+            // Настройка кнопок
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.FlatAppearance.BorderColor = Color.Black;
             btnSearch.FlatAppearance.BorderSize = 1;
@@ -103,21 +102,30 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                string sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
-                              FROM vw_ProductsWithStock
-                              WHERE StockQuantity > 0
-                              ORDER BY Name";
+                string sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity
+                      FROM vw_ProductsWithStock
+                      WHERE StockQuantity > 0
+                      ORDER BY Name";
 
-                var data = DatabaseHelper.ExecuteQuery(sql);
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    sql += " AND (Article ILIKE @Search OR Name ILIKE @Search)";
+                }
+
+                NpgsqlParameter[] parameters = null;
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    parameters = new[] { new NpgsqlParameter("@Search", "%" + searchText + "%") };
+                }
+
+                var data = DatabaseHelper.ExecuteQuery(sql, parameters);
                 dgvProducts.DataSource = data;
 
-         
                 dgvProducts.Columns["Id"].Visible = false;
                 dgvProducts.Columns["Article"].HeaderText = "Артикул";
                 dgvProducts.Columns["Name"].HeaderText = "Название";
                 dgvProducts.Columns["UnitOfMeasure"].HeaderText = "Ед. изм.";
                 dgvProducts.Columns["StockQuantity"].HeaderText = "Остаток";
-                dgvProducts.Columns["PurchasePrice"].HeaderText = "Цена";  
 
                 dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
@@ -125,18 +133,12 @@ namespace WarehouseManagementSystem.Forms
                 lblAvailable.Text = "Доступно: 0";
                 _selectedProductId = -1;
                 _availableStock = 0;
-                _productPrice = 0;
+                _productPrice = 0;  
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки: " + ex.Message, "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ошибка загрузки: " + ex.Message);
             }
-        }
-
-        private void BtnSearch_Click(object sender, EventArgs e)
-        {
-            LoadProducts(txtSearch.Text);
         }
 
         private void DgvProducts_SelectionChanged(object sender, EventArgs e)
@@ -145,23 +147,20 @@ namespace WarehouseManagementSystem.Forms
             {
                 _selectedProductId = Convert.ToInt32(dgvProducts.CurrentRow.Cells["Id"].Value);
                 _availableStock = Convert.ToDecimal(dgvProducts.CurrentRow.Cells["StockQuantity"].Value);
-
-             
-                if (dgvProducts.Columns.Contains("PurchasePrice") &&
-                    dgvProducts.CurrentRow.Cells["PurchasePrice"].Value != null)
-                {
-                    _productPrice = Convert.ToDecimal(dgvProducts.CurrentRow.Cells["PurchasePrice"].Value);
-                }
-                else
-                {
-                    _productPrice = 0;
-                }
+                _productPrice = 0;  
 
                 lblAvailable.Text = $"Доступно: {_availableStock}";
                 txtQuantity.Text = "";
                 txtQuantity.Focus();
             }
         }
+
+        private void BtnSearch_Click(object sender, EventArgs e)
+        {
+            LoadProducts(txtSearch.Text.Trim());
+        }
+
+     
 
         private void TxtQuantity_TextChanged(object sender, EventArgs e)
         {
@@ -187,6 +186,13 @@ namespace WarehouseManagementSystem.Forms
 
         private void TxtQuantity_KeyPress(object sender, KeyPressEventArgs e)
         {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                BtnAdd_Click(sender, e);
+                return;
+            }
+
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) &&
                 e.KeyChar != ',' && e.KeyChar != '.')
             {
@@ -198,36 +204,31 @@ namespace WarehouseManagementSystem.Forms
         {
             if (_selectedProductId == -1)
             {
-                MessageBox.Show("Выберите товар из списка", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Выберите товар из списка");
                 return;
             }
 
             if (string.IsNullOrEmpty(txtQuantity.Text))
             {
-                MessageBox.Show("Введите количество", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Введите количество");
                 return;
             }
 
             if (!decimal.TryParse(txtQuantity.Text, out var quantity))
             {
-                MessageBox.Show("Введите корректное количество", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Введите корректное количество");
                 return;
             }
 
             if (quantity <= 0)
             {
-                MessageBox.Show("Количество должно быть больше нуля", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Количество должно быть больше нуля");
                 return;
             }
 
             if (quantity > _availableStock)
             {
-                MessageBox.Show($"Недостаточно товара на складе. Доступно: {_availableStock}",
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Недостаточно товара. Доступно: {_availableStock}");
                 return;
             }
 
