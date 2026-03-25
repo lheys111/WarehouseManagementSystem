@@ -1,4 +1,4 @@
-﻿using Npgsql;
+﻿/*using Npgsql;
 using System;
 using System.Data;
 using System.Drawing;
@@ -221,7 +221,6 @@ namespace WarehouseManagementSystem.Forms
                 dgvStock.DataSource = null;
                 dgvStock.DataSource = newData;
 
-                // Настройка колонок
                 if (dgvStock.Columns.Contains("Id"))
                     dgvStock.Columns["Id"].Visible = false;
                 if (dgvStock.Columns.Contains("Article"))
@@ -238,9 +237,8 @@ namespace WarehouseManagementSystem.Forms
                 dgvStock.Refresh();
             }));
         }
-      
-              
-          
+
+
         private void btnConfirm_Click(object sender, EventArgs e)
         {
             if (_cartTable.Rows.Count == 0)
@@ -317,6 +315,104 @@ namespace WarehouseManagementSystem.Forms
                 MessageBox.Show($"{Constants.Messages.ShipmentSuccess} №{_shipmentNumber}!",
                     "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                // Очищаем корзину
+                _cartTable.Clear();
+                dgvCart.DataSource = null;
+                dgvCart.DataSource = _cartTable;
+
+                // Генерируем новый номер
+                GenerateShipmentNumber();
+
+                // ОБНОВЛЯЕМ СПИСОК ОСТАТКОВ
+                ForceRefreshStock();
+
+                // Показываем сообщение об обновлении
+                MessageBox.Show("Список остатков обновлен", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error(ex, "Ошибка проведения отгрузки");
+                MessageBox.Show("Ошибка при проведении отгрузки: " + ex.Message, Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        /*private void btnConfirm_Click(object sender, EventArgs e)
+        {
+            if (_cartTable.Rows.Count == 0)
+            {
+                MessageBox.Show("Добавьте товары в отгрузку", Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var confirm = MessageBox.Show(Constants.Messages.ShipmentConfirm, "Подтверждение",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            try
+            {
+                using (var conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        var shipmentSql = @"INSERT INTO Shipments (ShipmentNumber, ShipmentDate, StorekeeperId, Status) 
+                                   VALUES (@Number, @Date, @StorekeeperId, 'Completed') RETURNING Id";
+                        using (var cmd = new NpgsqlCommand(shipmentSql, conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@Number", _shipmentNumber);
+                            cmd.Parameters.AddWithValue("@Date", DateTime.Now);
+                            cmd.Parameters.AddWithValue("@StorekeeperId", Session.CurrentUser.Id);
+                            var shipmentId = Convert.ToInt32(cmd.ExecuteScalar());
+
+                            foreach (DataRow row in _cartTable.Rows)
+                            {
+                                var productId = Convert.ToInt32(row["ProductId"]);
+                                var quantity = Convert.ToDecimal(row["Quantity"]);
+                                var price = Convert.ToDecimal(row["Price"]);
+
+                                var checkSql = "SELECT Quantity FROM StockBalances WHERE ProductId = @ProductId";
+                                using (var checkCmd = new NpgsqlCommand(checkSql, conn, tran))
+                                {
+                                    checkCmd.Parameters.AddWithValue("@ProductId", productId);
+                                    var stock = Convert.ToDecimal(checkCmd.ExecuteScalar());
+
+                                    if (stock < quantity)
+                                    {
+                                        throw new Exception($"Недостаточно товара '{row["Name"]}'. Доступно: {stock}");
+                                    }
+                                }
+
+                                var detailSql = @"INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment) 
+                                         VALUES (@ShipmentId, @ProductId, @Quantity, @Price)";
+                                using (var detailCmd = new NpgsqlCommand(detailSql, conn, tran))
+                                {
+                                    detailCmd.Parameters.AddWithValue("@ShipmentId", shipmentId);
+                                    detailCmd.Parameters.AddWithValue("@ProductId", productId);
+                                    detailCmd.Parameters.AddWithValue("@Quantity", quantity);
+                                    detailCmd.Parameters.AddWithValue("@Price", price);
+                                    detailCmd.ExecuteNonQuery();
+                                }
+
+                                var stockSql = "UPDATE StockBalances SET Quantity = Quantity - @Quantity, UpdatedAt = CURRENT_TIMESTAMP WHERE ProductId = @ProductId";
+                                using (var stockCmd = new NpgsqlCommand(stockSql, conn, tran))
+                                {
+                                    stockCmd.Parameters.AddWithValue("@Quantity", quantity);
+                                    stockCmd.Parameters.AddWithValue("@ProductId", productId);
+                                    stockCmd.ExecuteNonQuery();
+                                }
+                            }
+                            tran.Commit();
+                        }
+                    }
+                }
+
+        AppLogger.Info($"Проведена отгрузка №{_shipmentNumber}");
+                MessageBox.Show($"{Constants.Messages.ShipmentSuccess} №{_shipmentNumber}!",
+                    "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 _cartTable.Clear();
                 dgvCart.Refresh();
                 GenerateShipmentNumber();
@@ -328,6 +424,300 @@ namespace WarehouseManagementSystem.Forms
             {
                 AppLogger.Error(ex, "Ошибка проведения отгрузки");
                 MessageBox.Show("Ошибка при проведении отгрузки: " + ex.Message, Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
+}*/
+using Npgsql;
+using System;
+using System.Data;
+using System.Drawing;
+using System.Windows.Forms;
+using WarehouseManagementSystem.Helpers;
+using WarehouseManagementSystem.Models;
+
+namespace WarehouseManagementSystem.Forms
+{
+    public partial class FormNewShipment : Form
+    {
+        private DataTable _cartTable;
+        private string _shipmentNumber;
+
+        public FormNewShipment()
+        {
+            InitializeComponent();
+            InitializeEvents();
+            InitializeCart();
+            LoadStock();
+            GenerateShipmentNumber();
+            lblDate.Text = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+            SetupButtons();
+            Text = Constants.FormTitles.NewShipment;
+        }
+
+        private void InitializeEvents()
+        {
+            btnAddItem.Click += btnAddItem_Click;
+            btnRemoveItem.Click += btnRemoveItem_Click;
+            btnRefreshStock.Click += btnRefreshStock_Click;
+            btnConfirm.Click += btnConfirm_Click;
+        }
+
+        private void SetupButtons()
+        {
+            var buttons = new[] { btnAddItem, btnRemoveItem, btnRefreshStock, btnConfirm };
+            foreach (var btn in buttons)
+            {
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderColor = Color.Black;
+                btn.FlatAppearance.BorderSize = 1;
+                btn.BackColor = Color.White;
+            }
+            btnConfirm.Font = new Font("Microsoft Sans Serif", 10, FontStyle.Bold);
+            btnAddItem.Text = "Добавить позицию";
+            btnRemoveItem.Text = "Удалить";
+            btnRefreshStock.Text = "Обновить";
+            btnConfirm.Text = "Провести отгрузку";
+        }
+
+        private void InitializeCart()
+        {
+            _cartTable = new DataTable();
+            _cartTable.Columns.Add("ProductId", typeof(int));
+            _cartTable.Columns.Add("Article", typeof(string));
+            _cartTable.Columns.Add("Name", typeof(string));
+            _cartTable.Columns.Add("Quantity", typeof(decimal));
+            _cartTable.Columns.Add("Price", typeof(decimal));
+            dgvCart.DataSource = _cartTable;
+
+            dgvCart.Columns["ProductId"].Visible = false;
+            dgvCart.Columns["Article"].HeaderText = "Артикул";
+            dgvCart.Columns["Name"].HeaderText = "Название";
+            dgvCart.Columns["Quantity"].HeaderText = "Кол-во";
+            dgvCart.Columns["Price"].HeaderText = "Цена";
+            dgvCart.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        }
+
+        private void LoadStock()
+        {
+            try
+            {
+                string sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
+                              FROM vw_ProductsWithStock
+                              WHERE StockQuantity > 0
+                              ORDER BY Name";
+                var data = DatabaseHelper.ExecuteQuery(sql);
+                dgvStock.DataSource = data;
+                ConfigureStockGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки остатков: " + ex.Message, "Ошибка");
+            }
+        }
+
+        private void ConfigureStockGrid()
+        {
+            if (dgvStock.Columns.Contains("Id"))
+                dgvStock.Columns["Id"].Visible = false;
+            if (dgvStock.Columns.Contains("Article"))
+                dgvStock.Columns["Article"].HeaderText = "Артикул";
+            if (dgvStock.Columns.Contains("Name"))
+                dgvStock.Columns["Name"].HeaderText = "Название";
+            if (dgvStock.Columns.Contains("UnitOfMeasure"))
+                dgvStock.Columns["UnitOfMeasure"].HeaderText = "Ед. изм.";
+            if (dgvStock.Columns.Contains("StockQuantity"))
+                dgvStock.Columns["StockQuantity"].HeaderText = "Остаток";
+            if (dgvStock.Columns.Contains("PurchasePrice"))
+                dgvStock.Columns["PurchasePrice"].HeaderText = "Цена";
+            dgvStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        }
+
+        private void RefreshStock()
+        {
+            try
+            {
+                string sql = @"SELECT Id, Article, Name, UnitOfMeasure, StockQuantity, PurchasePrice
+                              FROM vw_ProductsWithStock
+                              WHERE StockQuantity > 0
+                              ORDER BY Name";
+                var data = DatabaseHelper.ExecuteQuery(sql);
+                dgvStock.DataSource = null;
+                dgvStock.DataSource = data;
+                ConfigureStockGrid();
+                dgvStock.Refresh();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка обновления: " + ex.Message);
+            }
+        }
+
+        private void GenerateShipmentNumber()
+        {
+            try
+            {
+                string sql = "SELECT generate_shipment_number()";
+                _shipmentNumber = DatabaseHelper.ExecuteScalar(sql).ToString();
+                lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
+            }
+            catch
+            {
+                _shipmentNumber = $"INV-{DateTime.Now:yyyyMMdd}-001";
+                lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
+            }
+        }
+
+        private void btnAddItem_Click(object sender, EventArgs e)
+        {
+            if (dgvStock.CurrentRow == null)
+            {
+                MessageBox.Show("Выберите товар из списка остатков");
+                return;
+            }
+
+            var productId = Convert.ToInt32(dgvStock.CurrentRow.Cells["Id"].Value);
+            var article = dgvStock.CurrentRow.Cells["Article"].Value.ToString();
+            var name = dgvStock.CurrentRow.Cells["Name"].Value.ToString();
+            var stockQuantity = Convert.ToDecimal(dgvStock.CurrentRow.Cells["StockQuantity"].Value);
+            var price = Convert.ToDecimal(dgvStock.CurrentRow.Cells["PurchasePrice"].Value);
+
+            var selectForm = new FormSelectProduct(productId, article, name, stockQuantity, price);
+            if (selectForm.ShowDialog() == DialogResult.OK)
+            {
+                var selected = selectForm.SelectedProduct;
+
+                var existing = _cartTable.Select($"ProductId = {selected.ProductId}");
+                if (existing.Length > 0)
+                {
+                    MessageBox.Show("Этот товар уже добавлен в отгрузку");
+                    return;
+                }
+
+                _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, selected.Price);
+                MessageBox.Show($"Добавлено: {selected.Name} - {selected.Quantity} шт.");
+            }
+        }
+
+        private void btnRemoveItem_Click(object sender, EventArgs e)
+        {
+            if (dgvCart.CurrentRow != null)
+            {
+                var row = dgvCart.CurrentRow.DataBoundItem as DataRowView;
+                if (row != null)
+                {
+                    _cartTable.Rows.Remove(row.Row);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите позицию для удаления");
+            }
+        }
+
+        private void btnRefreshStock_Click(object sender, EventArgs e)
+        {
+            RefreshStock();
+            MessageBox.Show("Список остатков обновлен");
+        }
+
+        // =====================================================
+        // ГЛАВНЫЙ МЕТОД: ПРОВЕДЕНИЕ ОТГРУЗКИ
+        // =====================================================
+        private void btnConfirm_Click(object sender, EventArgs e)
+        {
+            if (_cartTable.Rows.Count == 0)
+            {
+                MessageBox.Show("Добавьте товары в отгрузку");
+                return;
+            }
+
+            var confirm = MessageBox.Show("Подтвердить отгрузку? Товары будут списаны со склада.",
+                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            try
+            {
+                using (var conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        // 1. СОЗДАЕМ ОТГРУЗКУ
+                        string shipmentSql = @"INSERT INTO Shipments (ShipmentNumber, ShipmentDate, StorekeeperId, Status) 
+                                              VALUES (@Number, @Date, @StorekeeperId, 'Completed') RETURNING Id";
+                        int shipmentId;
+                        using (var cmd = new NpgsqlCommand(shipmentSql, conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@Number", _shipmentNumber);
+                            cmd.Parameters.AddWithValue("@Date", DateTime.Now);
+                            cmd.Parameters.AddWithValue("@StorekeeperId", Session.CurrentUser.Id);
+                            shipmentId = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+
+                        // 2. ДОБАВЛЯЕМ ДЕТАЛИ И СПИСЫВАЕМ ОСТАТКИ
+                        foreach (DataRow row in _cartTable.Rows)
+                        {
+                            var productId = Convert.ToInt32(row["ProductId"]);
+                            var quantity = Convert.ToDecimal(row["Quantity"]);
+                            var price = Convert.ToDecimal(row["Price"]);
+
+                            // Проверяем остатки
+                            string checkSql = "SELECT Quantity FROM StockBalances WHERE ProductId = @ProductId";
+                            using (var checkCmd = new NpgsqlCommand(checkSql, conn, tran))
+                            {
+                                checkCmd.Parameters.AddWithValue("@ProductId", productId);
+                                var stock = Convert.ToDecimal(checkCmd.ExecuteScalar());
+
+                                if (stock < quantity)
+                                {
+                                    throw new Exception($"Недостаточно товара '{row["Name"]}'. Доступно: {stock}");
+                                }
+                            }
+
+                            // Добавляем деталь отгрузки
+                            string detailSql = @"INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment) 
+                                                VALUES (@ShipmentId, @ProductId, @Quantity, @Price)";
+                            using (var detailCmd = new NpgsqlCommand(detailSql, conn, tran))
+                            {
+                                detailCmd.Parameters.AddWithValue("@ShipmentId", shipmentId);
+                                detailCmd.Parameters.AddWithValue("@ProductId", productId);
+                                detailCmd.Parameters.AddWithValue("@Quantity", quantity);
+                                detailCmd.Parameters.AddWithValue("@Price", price);
+                                detailCmd.ExecuteNonQuery();
+                            }
+
+                            // СПИСЫВАЕМ ТОВАРЫ СО СКЛАДА
+                            string stockSql = "UPDATE StockBalances SET Quantity = Quantity - @Quantity, UpdatedAt = CURRENT_TIMESTAMP WHERE ProductId = @ProductId";
+                            using (var stockCmd = new NpgsqlCommand(stockSql, conn, tran))
+                            {
+                                stockCmd.Parameters.AddWithValue("@Quantity", quantity);
+                                stockCmd.Parameters.AddWithValue("@ProductId", productId);
+                                stockCmd.ExecuteNonQuery();
+                            }
+                        }
+                        tran.Commit();
+                    }
+                }
+
+                // УСПЕХ!
+                MessageBox.Show($"Отгрузка №{_shipmentNumber} успешно проведена!\nТовары списаны со склада.",
+                    "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Очищаем корзину
+                _cartTable.Clear();
+
+                // Обновляем список остатков
+                RefreshStock();
+
+                // Генерируем новый номер для следующей отгрузки
+                GenerateShipmentNumber();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при проведении отгрузки: " + ex.Message, "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

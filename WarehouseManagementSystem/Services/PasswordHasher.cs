@@ -12,8 +12,6 @@ namespace WarehouseManagementSystem.Services
             {
                 var bytes = Encoding.UTF8.GetBytes(password);
                 var hashBytes = sha256.ComputeHash(bytes);
-
-                // Преобразуем байты в hex строку (старый способ)
                 var sb = new StringBuilder();
                 foreach (var b in hashBytes)
                 {
