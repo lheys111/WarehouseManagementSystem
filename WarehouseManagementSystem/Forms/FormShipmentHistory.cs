@@ -25,33 +25,6 @@ namespace WarehouseManagementSystem.Forms
         {
             btnViewDetails.Click += btnViewDetails_Click;
         }
-
-        /*private void LoadShipments()
-        {
-            try
-            {
-                DataTable data;
-                if (_isStorekeeper)
-                {
-                    var sql = Constants.Queries.GetAllShipments + " WHERE StorekeeperName = @Storekeeper";
-                    var parameters = new[] { new NpgsqlParameter("@Storekeeper", Session.CurrentUser.FullName) };
-                    data = DatabaseHelper.ExecuteQuery(sql, parameters);
-                }
-                else
-                {
-                    data = DatabaseHelper.ExecuteQuery(Constants.Queries.GetAllShipments);
-                }
-
-                dgvShipments.DataSource = data;
-                ConfigureGrid();
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Error(ex, "Ошибка загрузки истории отгрузок");
-                MessageBox.Show(Constants.Messages.ConnectionError, Text,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }*/
         private void LoadShipments()
         {
             try
@@ -153,6 +126,11 @@ namespace WarehouseManagementSystem.Forms
             var shipmentNumber = dgvShipments.CurrentRow.Cells["ShipmentNumber"].Value.ToString();
             var detailsForm = new FormShipmentDetails(shipmentId, shipmentNumber);
             detailsForm.ShowDialog();
+        }
+
+        private void FormShipmentHistory_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

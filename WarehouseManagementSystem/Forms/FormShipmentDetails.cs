@@ -86,5 +86,10 @@ namespace WarehouseManagementSystem.Forms
         {
             Close();
         }
+
+        private void FormShipmentDetails_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

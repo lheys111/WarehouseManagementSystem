@@ -10,7 +10,7 @@ namespace WarehouseManagementSystem.Helpers
     /// </summary>
     public static class DatabaseHelper
     {
-        private static readonly string _connectionString = "Host=localhost;Port=5432;Database=WarehouseDB;Username=postgres;Password=postgres;";
+        private static readonly string _connectionString = "Host=localhost;Port=5432;Database=WarehouseBD;Username=postgres;Password=postgres;";
 
         /// <summary>
         /// Получить соединение с базой данных
