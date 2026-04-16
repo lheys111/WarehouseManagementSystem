@@ -92,6 +92,7 @@
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.txtSearch);
             this.Name = "FormStockBalances";
+            this.Load += new System.EventHandler(this.FormStockBalances_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvStock)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

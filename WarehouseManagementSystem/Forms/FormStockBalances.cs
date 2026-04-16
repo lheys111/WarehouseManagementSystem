@@ -76,5 +76,10 @@ namespace WarehouseManagementSystem.Forms
         {
             LoadStock(txtSearch.Text);
         }
+
+        private void FormStockBalances_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

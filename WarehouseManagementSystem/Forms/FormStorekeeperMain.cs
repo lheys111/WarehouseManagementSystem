@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+using WarehouseManagementSystem.Models;
 using WarehouseManagementSystem.Services;
 
 namespace WarehouseManagementSystem.Forms
@@ -73,6 +74,17 @@ namespace WarehouseManagementSystem.Forms
         {
             AppLogger.Info("Завершение работы приложения");
             Application.Exit();
+        }
+
+        private void новаяПоставкаToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormSupply form = new FormSupply(Session.CurrentUser.Id);
+            form.ShowDialog();
+        }
+
+        private void FormStorekeeperMain_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
