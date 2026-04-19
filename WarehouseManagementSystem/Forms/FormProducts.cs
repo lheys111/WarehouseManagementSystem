@@ -4,6 +4,7 @@ using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 
+
 namespace WarehouseManagementSystem.Forms
 {
     public partial class FormProducts : Form
@@ -21,18 +22,38 @@ namespace WarehouseManagementSystem.Forms
             btnAdd.Click += btnAdd_Click;
             btnEdit.Click += btnEdit_Click;
             btnDelete.Click += btnDelete_Click;
+            
         }
 
         private void LoadProducts(string searchText = "")
         {
             try
             {
-                var sql = Constants.Queries.GetProductsWithStock;
+                string sql = @"
+            SELECT 
+                p.Id,
+                p.Article,
+                p.Name,
+                c.Name AS CategoryName,
+                p.UnitOfMeasure,
+                p.PurchasePrice,
+                COALESCE(s.Quantity, 0) AS StockQuantity,
+                p.ExpiryDate,
+                CASE 
+                    WHEN p.ExpiryDate IS NULL THEN 'Годен'
+                    WHEN p.ExpiryDate < CURRENT_DATE THEN 'Просрочен'
+                    WHEN p.ExpiryDate < CURRENT_DATE + INTERVAL '30 days' THEN 'Скоро истекает'
+                    ELSE 'Годен'
+                END AS Status
+            FROM Products p
+            LEFT JOIN Categories c ON p.CategoryId = c.Id
+            LEFT JOIN StockBalances s ON p.Id = s.ProductId";
+
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    sql += " WHERE Article ILIKE @Search OR Name ILIKE @Search";
+                    sql += " WHERE p.Article ILIKE @Search OR p.Name ILIKE @Search";
                 }
-                sql += " ORDER BY Name";
+                sql += " ORDER BY p.Name";
 
                 NpgsqlParameter[] parameters = null;
                 if (!string.IsNullOrEmpty(searchText))
@@ -57,18 +78,41 @@ namespace WarehouseManagementSystem.Forms
         {
             if (dgvProducts.Columns.Contains("Id"))
                 dgvProducts.Columns["Id"].Visible = false;
+
             if (dgvProducts.Columns.Contains("Article"))
                 dgvProducts.Columns["Article"].HeaderText = Constants.GridHeaders.Article;
+
             if (dgvProducts.Columns.Contains("Name"))
                 dgvProducts.Columns["Name"].HeaderText = Constants.GridHeaders.Name;
+
             if (dgvProducts.Columns.Contains("CategoryName"))
                 dgvProducts.Columns["CategoryName"].HeaderText = Constants.GridHeaders.Category;
+
             if (dgvProducts.Columns.Contains("UnitOfMeasure"))
                 dgvProducts.Columns["UnitOfMeasure"].HeaderText = Constants.GridHeaders.Unit;
+
             if (dgvProducts.Columns.Contains("PurchasePrice"))
+            {
                 dgvProducts.Columns["PurchasePrice"].HeaderText = Constants.GridHeaders.Price;
+                dgvProducts.Columns["PurchasePrice"].DefaultCellStyle.Format = "N2";
+                dgvProducts.Columns["PurchasePrice"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+
             if (dgvProducts.Columns.Contains("StockQuantity"))
+            {
                 dgvProducts.Columns["StockQuantity"].HeaderText = Constants.GridHeaders.Stock;
+                dgvProducts.Columns["StockQuantity"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+
+            if (dgvProducts.Columns.Contains("Status"))
+            {
+                dgvProducts.Columns["Status"].HeaderText = "Статус";
+                dgvProducts.Columns["Status"].Width = 120;
+            }
+            if (dgvProducts.Columns.Contains("ExpiryDate"))
+            {
+                dgvProducts.Columns["ExpiryDate"].Visible = false;
+            }
 
             dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
@@ -130,6 +174,11 @@ namespace WarehouseManagementSystem.Forms
                 MessageBox.Show(Constants.Messages.ConnectionError, Constants.FormTitles.Products,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+       
+        private void dgvProducts_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

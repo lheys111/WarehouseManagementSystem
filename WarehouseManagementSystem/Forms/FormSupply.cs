@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -34,10 +35,13 @@ namespace WarehouseManagementSystem.Forms
         private void GenerateDocumentNumber()
         {
             string datePart = dtpSupplyDate.Value.ToString("yyyyMMdd");
-            string sql = "SELECT COUNT(*) FROM Shipments WHERE ShipmentNumber LIKE '" + datePart + "%'";
-            int count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql));
+
+            string sql = "SELECT COUNT(*) FROM Shipments WHERE ShipmentNumber LIKE @pattern";
+            var param = new NpgsqlParameter("@pattern", $"INV-{datePart}-%");
+            int count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql, new[] { param }));
+
             int nextNumber = count + 1;
-            txtDocumentNumber.Text = "INV-" + datePart + "-" + nextNumber.ToString("D3");
+            txtDocumentNumber.Text = $"INV-{datePart}-{nextNumber:D3}";
         }
         private void btnGenerateNumber_Click(object sender, EventArgs e)
         {
@@ -55,6 +59,7 @@ namespace WarehouseManagementSystem.Forms
                 if (selectForm.ShowDialog() == DialogResult.OK)
                 {
                     ProductDto product = selectForm.SelectedProduct;
+                    MessageBox.Show($"Добавлен товар: ID={product.Id}, Название={product.Name}");
 
                     foreach (DataRow row in itemsTable.Rows)
                     {
@@ -70,7 +75,8 @@ namespace WarehouseManagementSystem.Forms
                         product.Article,
                         product.Name,
                         1,
-                        product.PurchasePrice
+                        product.PurchasePrice,
+                        DBNull.Value
                     );
                 }
             }
@@ -83,7 +89,8 @@ namespace WarehouseManagementSystem.Forms
             itemsTable.Columns.Add("Article", typeof(string)); 
             itemsTable.Columns.Add("ProductName", typeof(string));
             itemsTable.Columns.Add("Quantity", typeof(decimal)); 
-            itemsTable.Columns.Add("PurchasePrice", typeof(decimal)); 
+            itemsTable.Columns.Add("PurchasePrice", typeof(decimal));
+            itemsTable.Columns.Add("ExpiryDate", typeof(DateTime));
 
             dgvItems.DataSource = itemsTable;
 
@@ -92,6 +99,8 @@ namespace WarehouseManagementSystem.Forms
             dgvItems.Columns["ProductName"].HeaderText = "Название";
             dgvItems.Columns["Quantity"].HeaderText = "Кол-во";
             dgvItems.Columns["PurchasePrice"].HeaderText = "Цена";
+            dgvItems.Columns["ExpiryDate"].HeaderText = "Срок годности";
+            dgvItems.Columns["ExpiryDate"].DefaultCellStyle.Format = "dd.MM.yyyy";
 
 
         }
@@ -138,12 +147,12 @@ namespace WarehouseManagementSystem.Forms
                         string shipmentNumber = txtDocumentNumber.Text;
 
                         string sqlShipment = @"
-                    INSERT INTO Shipments (ShipmentNumber, ShipmentDate, StorekeeperId, Status)
-                    VALUES (@number, @date, @userId, 'Completed')
-                    RETURNING Id";
+            INSERT INTO Shipments (ShipmentNumber, ShipmentDate, StorekeeperId, Status)
+            VALUES (@number, @date, @userId, 'Completed')
+            RETURNING Id";
 
                         int shipmentId;
-                        using (var cmd = new NpgsqlCommand(sqlShipment, conn))
+                        using (var cmd = new NpgsqlCommand(sqlShipment, conn, transaction))
                         {
                             cmd.Parameters.AddWithValue("@number", shipmentNumber);
                             cmd.Parameters.AddWithValue("@date", dtpSupplyDate.Value);
@@ -157,10 +166,11 @@ namespace WarehouseManagementSystem.Forms
                             decimal quantity = Convert.ToDecimal(row["Quantity"]);
                             decimal price = Convert.ToDecimal(row["PurchasePrice"]);
 
+                            
                             string sqlDetail = @"
-                        INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment)
-                        VALUES (@shipmentId, @productId, @quantity, @price)";
-                            using (var cmd = new NpgsqlCommand(sqlDetail, conn))
+                INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment)
+                VALUES (@shipmentId, @productId, @quantity, @price)";
+                            using (var cmd = new NpgsqlCommand(sqlDetail, conn, transaction))
                             {
                                 cmd.Parameters.AddWithValue("@shipmentId", shipmentId);
                                 cmd.Parameters.AddWithValue("@productId", productId);
@@ -169,8 +179,9 @@ namespace WarehouseManagementSystem.Forms
                                 cmd.ExecuteNonQuery();
                             }
 
+                            
                             string sqlUpdate = "UPDATE StockBalances SET Quantity = Quantity + @quantity WHERE ProductId = @productId";
-                            using (var cmd = new NpgsqlCommand(sqlUpdate, conn))
+                            using (var cmd = new NpgsqlCommand(sqlUpdate, conn, transaction))
                             {
                                 cmd.Parameters.AddWithValue("@productId", productId);
                                 cmd.Parameters.AddWithValue("@quantity", quantity);
@@ -179,7 +190,7 @@ namespace WarehouseManagementSystem.Forms
                                 if (rowsAffected == 0)
                                 {
                                     string sqlInsert = "INSERT INTO StockBalances (ProductId, Quantity) VALUES (@productId, @quantity)";
-                                    using (var insertCmd = new NpgsqlCommand(sqlInsert, conn))
+                                    using (var insertCmd = new NpgsqlCommand(sqlInsert, conn, transaction))
                                     {
                                         insertCmd.Parameters.AddWithValue("@productId", productId);
                                         insertCmd.Parameters.AddWithValue("@quantity", quantity);
@@ -187,8 +198,30 @@ namespace WarehouseManagementSystem.Forms
                                     }
                                 }
                             }
-                        }
 
+                            /*
+                             string sqlBatch = @"
+                 INSERT INTO StockBatches (ProductId, Quantity, PurchasePrice, ExpiryDate, ReceivedDate, ShipmentId)
+                 VALUES (@productId, @quantity, @price, @expiryDate, @receivedDate, @shipmentId)";
+                             using (var cmd = new NpgsqlCommand(sqlBatch, conn, transaction))
+                             {
+                                 cmd.Parameters.AddWithValue("@productId", productId);
+                                 cmd.Parameters.AddWithValue("@quantity", quantity);
+                                 cmd.Parameters.AddWithValue("@price", price);
+                                 cmd.Parameters.AddWithValue("@expiryDate", GetExpiryDate(productId) ?? (object)DBNull.Value);
+                                 cmd.Parameters.AddWithValue("@receivedDate", dtpSupplyDate.Value);
+                                 cmd.Parameters.AddWithValue("@shipmentId", shipmentId);
+                                 cmd.ExecuteNonQuery(); 
+                             }*/
+                        }
+                        
+
+                        Debug.WriteLine($"ShipmentId: {shipmentId}");
+                        Debug.WriteLine($"Items added: {itemsTable.Rows.Count}");
+                        /*foreach (DataRow row in itemsTable.Rows)
+                        {
+                            Debug.WriteLine($"Product: {row["ProductName"]}, Qty: {row["Quantity"]}, Price: {row["PurchasePrice"]}");
+                        }*/
                         transaction.Commit();
                         MessageBox.Show("Поставка успешно сохранена!", "Успех",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -198,14 +231,25 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (PostgresException ex)
             {
-                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Ошибка PostgreSQL: {ex.Message}\nТаблица: {ex.TableName}\nПодробности: {ex.Detail}", "Ошибка");
+                return;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
             }
         }
+        private DateTime? GetExpiryDate(int productId)
+        {
+            string sql = "SELECT ExpiryDate FROM Products WHERE Id = @productId";
+            var param = new[] { new NpgsqlParameter("@productId", productId) };
+            var result = DatabaseHelper.ExecuteScalar(sql, param);
+            return result != null && result != DBNull.Value ? Convert.ToDateTime(result) : (DateTime?)null;
+        }
     }
-}
+
+
+
+       
+    }
+

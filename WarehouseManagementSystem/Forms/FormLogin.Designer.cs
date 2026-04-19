@@ -125,6 +125,7 @@
             this.Controls.Add(this.txtPassword);
             this.Controls.Add(this.txtEmail);
             this.Name = "FormLogin";
+            this.Load += new System.EventHandler(this.FormLogin_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

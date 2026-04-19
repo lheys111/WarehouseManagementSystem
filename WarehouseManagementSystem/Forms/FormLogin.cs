@@ -86,5 +86,10 @@ namespace WarehouseManagementSystem.Forms
         {
             new FormRegistration().ShowDialog();
         }
+
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
