@@ -36,8 +36,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.txtShelfLife = new System.Windows.Forms.TextBox();
             this.txtPrice = new System.Windows.Forms.TextBox();
             this.txtUnit = new System.Windows.Forms.TextBox();
             this.txtArticle = new System.Windows.Forms.TextBox();
@@ -45,6 +43,9 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.cmbCategory = new System.Windows.Forms.ComboBox();
+            this.dtpExpiryDate = new System.Windows.Forms.DateTimePicker();
+            this.chkNoExpiry = new System.Windows.Forms.CheckBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -121,23 +122,6 @@
             this.label6.TabIndex = 5;
             this.label6.Text = "Единица измерения";
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(109, 318);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(102, 16);
-            this.label7.TabIndex = 6;
-            this.label7.Text = "Срок годности";
-            // 
-            // txtShelfLife
-            // 
-            this.txtShelfLife.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.txtShelfLife.Location = new System.Drawing.Point(112, 337);
-            this.txtShelfLife.Name = "txtShelfLife";
-            this.txtShelfLife.Size = new System.Drawing.Size(216, 22);
-            this.txtShelfLife.TabIndex = 8;
-            // 
             // txtPrice
             // 
             this.txtPrice.BackColor = System.Drawing.Color.MediumAquamarine;
@@ -201,11 +185,40 @@
             this.cmbCategory.Size = new System.Drawing.Size(216, 24);
             this.cmbCategory.TabIndex = 1;
             // 
+            // dtpExpiryDate
+            // 
+            this.dtpExpiryDate.Location = new System.Drawing.Point(112, 337);
+            this.dtpExpiryDate.Name = "dtpExpiryDate";
+            this.dtpExpiryDate.Size = new System.Drawing.Size(147, 22);
+            this.dtpExpiryDate.TabIndex = 15;
+            // 
+            // chkNoExpiry
+            // 
+            this.chkNoExpiry.AutoSize = true;
+            this.chkNoExpiry.Location = new System.Drawing.Point(278, 337);
+            this.chkNoExpiry.Name = "chkNoExpiry";
+            this.chkNoExpiry.Size = new System.Drawing.Size(95, 20);
+            this.chkNoExpiry.TabIndex = 16;
+            this.chkNoExpiry.Text = "Без срока";
+            this.chkNoExpiry.UseVisualStyleBackColor = true;
+            this.chkNoExpiry.CheckedChanged += new System.EventHandler(this.chkNoExpiry_CheckedChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(109, 318);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(102, 16);
+            this.label7.TabIndex = 6;
+            this.label7.Text = "Срок годности";
+            // 
             // FormProductEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(463, 487);
+            this.Controls.Add(this.chkNoExpiry);
+            this.Controls.Add(this.dtpExpiryDate);
             this.Controls.Add(this.cmbCategory);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label4);
@@ -213,7 +226,6 @@
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.txtShelfLife);
             this.Controls.Add(this.txtPrice);
             this.Controls.Add(this.txtUnit);
             this.Controls.Add(this.txtArticle);
@@ -240,8 +252,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox txtShelfLife;
         private System.Windows.Forms.TextBox txtPrice;
         private System.Windows.Forms.TextBox txtUnit;
         private System.Windows.Forms.TextBox txtArticle;
@@ -249,5 +259,8 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.ComboBox cmbCategory;
+        private System.Windows.Forms.DateTimePicker dtpExpiryDate;
+        private System.Windows.Forms.CheckBox chkNoExpiry;
+        private System.Windows.Forms.Label label7;
     }
 }

@@ -86,5 +86,13 @@ namespace WarehouseManagementSystem.Forms
         {
 
         }
+
+        private void сменитьПользователяToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormLogin loginForm = new FormLogin();
+            loginForm.Show();
+
+            this.Close();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
@@ -133,17 +134,9 @@ namespace WarehouseManagementSystem.Forms
 
         private void GenerateShipmentNumber()
         {
-            try
-            {
-                string sql = "SELECT generate_shipment_number()";
-                _shipmentNumber = DatabaseHelper.ExecuteScalar(sql).ToString();
-                lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
-            }
-            catch
-            {
-                _shipmentNumber = $"INV-{DateTime.Now:yyyyMMdd}-001";
-                lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
-            }
+            string datePart = DateTime.Now.ToString("yyyyMMdd");
+            _shipmentNumber = $"SHP-{datePart}-001";
+            lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
         }
 
         private void btnAddItem_Click(object sender, EventArgs e)
@@ -262,14 +255,17 @@ namespace WarehouseManagementSystem.Forms
                                 detailCmd.Parameters.AddWithValue("@Quantity", quantity);
                                 detailCmd.ExecuteNonQuery();
                             }
- 
-                            string stockSql = "UPDATE StockBalances SET Quantity = Quantity - @Quantity WHERE ProductId = @ProductId";
-                            using (var stockCmd = new NpgsqlCommand(stockSql, conn, tran))
+
+                            // FIFO
+                            try
                             {
-                                stockCmd.Parameters.AddWithValue("@Quantity", quantity);
-                                stockCmd.Parameters.AddWithValue("@ProductId", productId);
-                                int rows = stockCmd.ExecuteNonQuery();
-                                MessageBox.Show($"Списано {quantity} шт. товара {productName}. Затронуто строк: {rows}");
+                                ShipProduct(productId, quantity);
+                                MessageBox.Show($"Списано {quantity} шт. товара {productName} (FIFO)");
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка списания {productName}: {ex.Message}");
+                                throw;
                             }
                         }
                         tran.Commit();
@@ -277,7 +273,7 @@ namespace WarehouseManagementSystem.Forms
                     }
                 }
 
-                MessageBox.Show($"✅ Отгрузка №{_shipmentNumber} проведена!");
+                MessageBox.Show($"Отгрузка №{_shipmentNumber} проведена!");
 
                 _cartTable.Clear();
                 RefreshStock();
@@ -287,6 +283,68 @@ namespace WarehouseManagementSystem.Forms
             {
                 MessageBox.Show($"❌ Ошибка: {ex.Message}");
             }
+
+
+        }
+
+        private void ShipProduct(int productId, decimal quantityToShip)
+        {
+            decimal remaining = quantityToShip;
+
+            string sql = @"
+    SELECT Id, Quantity, ExpiryDate, ReceivedDate FROM StockBatches 
+    WHERE ProductId = @productId AND Quantity > 0
+    ORDER BY ExpiryDate ASC NULLS LAST, ReceivedDate ASC";
+
+            var parameters = new[] { new NpgsqlParameter("@productId", productId) };
+            var batches = DatabaseHelper.ExecuteQuery(sql, parameters);
+
+            if (batches.Rows.Count == 0)
+            {
+                throw new Exception($"Нет партий товара для списания");
+            }
+
+            foreach (DataRow batch in batches.Rows)
+            {
+                if (remaining <= 0) break;
+
+                int batchId = Convert.ToInt32(batch["Id"]);
+                decimal batchQty = Convert.ToDecimal(batch["Quantity"]);
+                decimal take = Math.Min(remaining, batchQty);
+                Debug.WriteLine($"Списано {take} кг из партии {batchId}");
+
+                if (take >= batchQty)
+                {
+                    string deleteSql = "DELETE FROM StockBatches WHERE Id = @batchId";
+                    DatabaseHelper.ExecuteNonQuery(deleteSql, new[]
+                    {
+                new NpgsqlParameter("@batchId", batchId)
+            });
+                }
+                else
+                {
+                    string updateSql = "UPDATE StockBatches SET Quantity = Quantity - @take WHERE Id = @batchId";
+                    DatabaseHelper.ExecuteNonQuery(updateSql, new[]
+                    {
+                new NpgsqlParameter("@take", take),
+                new NpgsqlParameter("@batchId", batchId)
+            });
+                }
+
+                remaining -= take;
+            }
+
+            if (remaining > 0)
+            {
+                throw new Exception($"Недостаточно товара на складе. Не хватает: {remaining}");
+            }
+
+            string updateBalance = "UPDATE StockBalances SET Quantity = Quantity - @qty WHERE ProductId = @pid";
+            DatabaseHelper.ExecuteNonQuery(updateBalance, new[]
+            {
+        new NpgsqlParameter("@qty", quantityToShip),
+        new NpgsqlParameter("@pid", productId)
+    });
         }
     }
 }

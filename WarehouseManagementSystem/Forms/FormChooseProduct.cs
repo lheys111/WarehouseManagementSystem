@@ -22,9 +22,17 @@ namespace WarehouseManagementSystem.Forms
         }
         private void LoadProducts()
         {
-            string sql = "SELECT Id, Article, Name, PurchasePrice FROM Products ORDER BY Name";
-            DataTable products = DatabaseHelper.ExecuteQuery(sql);
-            dgvProducts.DataSource = products;
+            string sql = @"
+        SELECT 
+            p.Id,
+            p.Article,
+            p.Name,
+            p.PurchasePrice
+        FROM Products p
+        ORDER BY p.Name";
+
+            DataTable data = DatabaseHelper.ExecuteQuery(sql);
+            dgvProducts.DataSource = data;
 
             dgvProducts.Columns["Id"].Visible = false;
             dgvProducts.Columns["Article"].HeaderText = "Артикул";

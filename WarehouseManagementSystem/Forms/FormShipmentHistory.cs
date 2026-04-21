@@ -45,6 +45,7 @@ namespace WarehouseManagementSystem.Forms
                 JOIN Users u ON s.StorekeeperId = u.Id
                 LEFT JOIN ShipmentDetails sd ON s.Id = sd.ShipmentId
                 WHERE s.StorekeeperId = @StorekeeperId
+                AND s.ShipmentNumber LIKE 'SHP-%'
                 GROUP BY s.Id, s.ShipmentNumber, s.ShipmentDate, u.FullName
                 ORDER BY s.ShipmentDate DESC";
 
@@ -64,6 +65,7 @@ namespace WarehouseManagementSystem.Forms
                 FROM Shipments s
                 JOIN Users u ON s.StorekeeperId = u.Id
                 LEFT JOIN ShipmentDetails sd ON s.Id = sd.ShipmentId
+                WHERE s.ShipmentNumber LIKE 'SHP-%'
                 GROUP BY s.Id, s.ShipmentNumber, s.ShipmentDate, u.FullName
                 ORDER BY s.ShipmentDate DESC";
 

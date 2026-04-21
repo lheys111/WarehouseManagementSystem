@@ -18,6 +18,7 @@ namespace WarehouseManagementSystem.Forms
             this.btnSave.Click += btnSave_Click;
             this.btnCancel.Click += btnCancel_Click;
             LoadCategories();
+            SetupExpiryDate();
         }
 
         public FormProductEdit(int id)
@@ -29,7 +30,17 @@ namespace WarehouseManagementSystem.Forms
             this.btnSave.Click += btnSave_Click;
             this.btnCancel.Click += btnCancel_Click;
             LoadCategories();
+            SetupExpiryDate();
             LoadProductData();
+        }
+        private void SetupExpiryDate()
+        {
+            dtpExpiryDate.Format = DateTimePickerFormat.Short;
+            dtpExpiryDate.Value = DateTime.Now.AddDays(14);
+            dtpExpiryDate.Enabled = false;
+
+            chkNoExpiry.Checked = true;
+            chkNoExpiry.CheckedChanged += chkNoExpiry_CheckedChanged;
         }
 
         private void LoadCategories()
@@ -77,9 +88,17 @@ namespace WarehouseManagementSystem.Forms
                     txtUnit.Text = row["UnitOfMeasure"].ToString();
                     txtPrice.Text = row["PurchasePrice"].ToString();
 
-                    if (row["ShelfLife"] != DBNull.Value)
+                    if (row["ExpiryDate"] != DBNull.Value)
                     {
-                        txtShelfLife.Text = row["ShelfLife"].ToString();
+                        DateTime expiryDate = Convert.ToDateTime(row["ExpiryDate"]);
+                        dtpExpiryDate.Value = expiryDate;
+                        chkNoExpiry.Checked = false;
+                        dtpExpiryDate.Enabled = true;
+                    }
+                    else
+                    {
+                        chkNoExpiry.Checked = true;
+                        dtpExpiryDate.Enabled = false;
                     }
                 }
             }
@@ -128,14 +147,10 @@ namespace WarehouseManagementSystem.Forms
                 return;
             }
 
-            int? shelfLife = null;
-            if (!string.IsNullOrEmpty(txtShelfLife.Text))
+            DateTime? expiryDate = null;
+            if (!chkNoExpiry.Checked)
             {
-                int sl;
-                if (int.TryParse(txtShelfLife.Text, out sl) && sl > 0)
-                {
-                    shelfLife = sl;
-                }
+                expiryDate = dtpExpiryDate.Value;
             }
 
             int? categoryId = null;
@@ -148,11 +163,11 @@ namespace WarehouseManagementSystem.Forms
             {
                 if (_isEdit)
                 {
-                     
+
                     string sql = @"UPDATE Products 
-                                  SET Article = @Article, Name = @Name, CategoryId = @CategoryId,
-                                      UnitOfMeasure = @Unit, PurchasePrice = @Price, ShelfLife = @ShelfLife
-                                  WHERE Id = @Id";
+              SET Article = @Article, Name = @Name, CategoryId = @CategoryId,
+                  UnitOfMeasure = @Unit, PurchasePrice = @Price, ExpiryDate = @ExpiryDate
+              WHERE Id = @Id";
 
                     var parameters = new[]
                     {
@@ -161,7 +176,7 @@ namespace WarehouseManagementSystem.Forms
                         new NpgsqlParameter("@CategoryId", categoryId.HasValue ? (object)categoryId.Value : DBNull.Value),
                         new NpgsqlParameter("@Unit", txtUnit.Text),
                         new NpgsqlParameter("@Price", price),
-                        new NpgsqlParameter("@ShelfLife", shelfLife.HasValue ? (object)shelfLife.Value : DBNull.Value),
+                        new NpgsqlParameter("@ExpiryDate", expiryDate.HasValue ? (object)expiryDate.Value : DBNull.Value),
                         new NpgsqlParameter("@Id", _productId)
                     };
 
@@ -170,9 +185,9 @@ namespace WarehouseManagementSystem.Forms
                 }
                 else
                 {
-                   
-                    string insertSql = @"INSERT INTO Products (Article, Name, CategoryId, UnitOfMeasure, PurchasePrice, ShelfLife) 
-                                        VALUES (@Article, @Name, @CategoryId, @Unit, @Price, @ShelfLife) RETURNING Id";
+
+                    string insertSql = @"INSERT INTO Products (Article, Name, CategoryId, UnitOfMeasure, PurchasePrice, ExpiryDate) 
+                    VALUES (@Article, @Name, @CategoryId, @Unit, @Price, @ExpiryDate) RETURNING Id";
 
                     var insertParams = new[]
                     {
@@ -181,7 +196,7 @@ namespace WarehouseManagementSystem.Forms
                         new NpgsqlParameter("@CategoryId", categoryId.HasValue ? (object)categoryId.Value : DBNull.Value),
                         new NpgsqlParameter("@Unit", txtUnit.Text),
                         new NpgsqlParameter("@Price", price),
-                        new NpgsqlParameter("@ShelfLife", shelfLife.HasValue ? (object)shelfLife.Value : DBNull.Value)
+                       new NpgsqlParameter("@ExpiryDate", expiryDate.HasValue ? (object)expiryDate.Value : DBNull.Value)
                     };
 
                     int newId = Convert.ToInt32(DatabaseHelper.ExecuteScalar(insertSql, insertParams));
@@ -207,6 +222,16 @@ namespace WarehouseManagementSystem.Forms
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        private void txtShelfLife_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chkNoExpiry_CheckedChanged(object sender, EventArgs e)
+        {
+            dtpExpiryDate.Enabled = !chkNoExpiry.Checked;
         }
     }
 }
