@@ -20,6 +20,7 @@ namespace WarehouseManagementSystem.Forms
             InitializeComponent();
             LoadProducts();
         }
+
         private void LoadProducts()
         {
             string sql = @"
@@ -27,17 +28,37 @@ namespace WarehouseManagementSystem.Forms
             p.Id,
             p.Article,
             p.Name,
-            p.PurchasePrice
+            p.PurchasePrice,
+            COALESCE(SUM(sb.Quantity), 0) AS TotalStock,
+            COALESCE(
+                STRING_AGG(
+                    CONCAT(sb.Quantity, ' кг (поступление: ', COALESCE(sb.ReceivedDate::text, 'не указана'), ')'), 
+                    '; ' 
+                    ORDER BY sb.ReceivedDate ASC
+                ), 
+                'нет партий'
+            ) AS BatchesInfo
         FROM Products p
+        LEFT JOIN StockBatches sb ON p.Id = sb.ProductId AND sb.Quantity > 0
+        GROUP BY p.Id, p.Article, p.Name, p.PurchasePrice
         ORDER BY p.Name";
 
             DataTable data = DatabaseHelper.ExecuteQuery(sql);
+
+            dgvProducts.AutoGenerateColumns = false;
+            dgvProducts.Columns.Clear();
+
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "Id", DataPropertyName = "Id", Visible = false });
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn { Name = "Article", HeaderText = "Артикул", DataPropertyName = "Article", Width = 80 });
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Название", DataPropertyName = "Name", Width = 200 });
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn { Name = "PurchasePrice", HeaderText = "Цена", DataPropertyName = "PurchasePrice", Width = 80 });
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn { Name = "TotalStock", HeaderText = "Общий остаток", DataPropertyName = "TotalStock", Width = 100 });
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn { Name = "BatchesInfo", HeaderText = "Остатки по партиям", DataPropertyName = "BatchesInfo", Width = 350 });
+
             dgvProducts.DataSource = data;
 
-            dgvProducts.Columns["Id"].Visible = false;
-            dgvProducts.Columns["Article"].HeaderText = "Артикул";
-            dgvProducts.Columns["Name"].HeaderText = "Название";
-            dgvProducts.Columns["PurchasePrice"].HeaderText = "Цена";
+            dgvProducts.Columns["PurchasePrice"].DefaultCellStyle.Format = "N2";
+            dgvProducts.Columns["TotalStock"].DefaultCellStyle.Format = "N2";
         }
 
         private void FormChooseProduct_Load(object sender, EventArgs e)

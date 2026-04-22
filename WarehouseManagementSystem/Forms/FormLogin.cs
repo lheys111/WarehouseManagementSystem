@@ -47,18 +47,21 @@ namespace WarehouseManagementSystem.Forms
 
                 if (result.Rows.Count > 0)
                 {
+                    string roleString = result.Rows[0]["Role"].ToString();
+                    UserRole role = roleString == "Admin" ? UserRole.Admin : UserRole.Storekeeper;
+
                     Session.CurrentUser = new User
                     {
                         Id = Convert.ToInt32(result.Rows[0]["Id"]),
                         FullName = result.Rows[0]["FullName"].ToString(),
                         Email = email,
-                        Role = result.Rows[0]["Role"].ToString()
+                        Role = role
                     };
 
                     AppLogger.Info($"Пользователь {email} вошел в систему");
                     Hide();
 
-                    if (Session.CurrentUser.Role == Constants.Roles.Admin)
+                    if (Session.CurrentUser.Role == UserRole.Admin)
                     {
                         new FormAdminMain().Show();
                     }

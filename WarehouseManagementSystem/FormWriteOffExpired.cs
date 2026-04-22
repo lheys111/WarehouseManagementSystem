@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
+using WarehouseManagementSystem.Properties;
 
 namespace WarehouseManagementSystem
 {
@@ -31,12 +33,12 @@ namespace WarehouseManagementSystem
 
             if (selectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите товары для списания");
+                MessageBox.Show(String.SelectItemsToWriteOff);
                 return;
             }
 
-            var confirm = MessageBox.Show($"Списать выбранные товары ({selectedRows.Count} позиций)?",
-                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            var confirm = MessageBox.Show(string.Format(String.ConfirmWriteOffSelected, selectedRows.Count),
+      String.ConfirmTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -52,14 +54,14 @@ namespace WarehouseManagementSystem
                     successCount++;
             }
 
-            MessageBox.Show($"Списано товаров: {successCount} из {selectedRows.Count}");
+            MessageBox.Show(string.Format(String.WriteOffResult, successCount, selectedRows.Count));
             LoadExpiredProducts();
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
             LoadExpiredProducts();
-            MessageBox.Show("Список обновлён");
+            MessageBox.Show(String.ListRefreshed);
         }
 
         private void LoadExpiredProducts()
@@ -167,7 +169,8 @@ namespace WarehouseManagementSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка списания: {ex.Message}");
+                MessageBox.Show(string.Format(String.WriteOffError, ex.Message), String.ErrorTitle,
+    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }

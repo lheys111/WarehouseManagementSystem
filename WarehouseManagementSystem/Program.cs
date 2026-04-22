@@ -1,7 +1,9 @@
-﻿using System;
+﻿using NLog;
+using OfficeOpenXml;
+using Org.BouncyCastle.Utilities;
+using System;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Forms;
-using NLog;
 
 namespace WarehouseManagementSystem
 {
@@ -14,6 +16,8 @@ namespace WarehouseManagementSystem
         {
             try
             {
+                ExcelPackage.License.SetNonCommercialPersonal("Даша");
+
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new FormLogin());
@@ -21,8 +25,8 @@ namespace WarehouseManagementSystem
             catch (Exception ex)
             {
                 _logger.Error(ex, "Критическая ошибка при запуске приложения");
-                MessageBox.Show($"Произошла критическая ошибка:\n{ex.Message}",
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(String.CriticalError, ex.Message), String.ErrorTitle,
+    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

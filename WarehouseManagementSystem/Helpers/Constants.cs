@@ -26,11 +26,11 @@
             public const string ProductHasShipments = "Нельзя удалить товар, так как есть отгрузки с этим товаром";
         }
 
-        public static class Roles
+        /*public static class Roles
         {
             public const string Admin = "Admin";
             public const string Storekeeper = "Storekeeper";
-        }
+        }*/
 
         public static class ShipmentStatus
         {
