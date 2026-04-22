@@ -23,12 +23,15 @@ namespace WarehouseManagementSystem.Services
             if (!PasswordHasher.VerifyPassword(password, storedHash))
                 throw new Exception("Неверный пароль");
 
+            string roleString = userData["Role"].ToString();
+            UserRole role = roleString == "Admin" ? UserRole.Admin : UserRole.Storekeeper;
+
             return new User
             {
                 Id = Convert.ToInt32(userData["Id"]),
                 FullName = userData["FullName"].ToString(),
                 Email = userData["Email"].ToString(),
-                Role = userData["Role"].ToString()
+                Role = role
             };
         }
 
@@ -59,7 +62,7 @@ namespace WarehouseManagementSystem.Services
                 Id = newUserId,
                 FullName = fullName,
                 Email = email,
-                Role = "Storekeeper"
+                Role = UserRole.Storekeeper
             };
         }
 

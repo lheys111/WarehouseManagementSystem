@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
+using System;
 using System.Data;
-using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
@@ -92,8 +93,8 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(String.LoadError, ex.Message), String.ErrorTitle,
+    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

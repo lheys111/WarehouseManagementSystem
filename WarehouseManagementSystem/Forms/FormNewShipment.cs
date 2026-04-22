@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -98,11 +99,11 @@ namespace WarehouseManagementSystem.Forms
                 dgvStock.Columns["StockQuantity"].HeaderText = "Остаток";
                 dgvStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                MessageBox.Show($"Загружено товаров с остатками: {data.Rows.Count}");
+                MessageBox.Show(string.Format(String.ProductsLoaded, data.Rows.Count));
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки: " + ex.Message);
+                MessageBox.Show(string.Format(String.LoadError, ex.Message));
             }
         }
 
@@ -128,7 +129,7 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка обновления: " + ex.Message);
+                MessageBox.Show(string.Format(String.UpdateError, ex.Message));
             }
         }
 
@@ -143,7 +144,7 @@ namespace WarehouseManagementSystem.Forms
         {
             if (dgvStock.CurrentRow == null)
             {
-                MessageBox.Show("Выберите товар из списка остатков");
+                MessageBox.Show(String.SelectProductFromStock);
                 return;
             }
 
@@ -160,12 +161,12 @@ namespace WarehouseManagementSystem.Forms
                 var existing = _cartTable.Select($"ProductId = {selected.ProductId}");
                 if (existing.Length > 0)
                 {
-                    MessageBox.Show("Этот товар уже добавлен в отгрузку");
+                    MessageBox.Show(String.ProductAlreadyInShipment);
                     return;
                 }
 
                 _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, 0);
-                MessageBox.Show($"Добавлено: {selected.Name} - {selected.Quantity} шт.");
+                MessageBox.Show(string.Format(String.ProductAddedToShipment, selected.Name, selected.Quantity));
             }
         }
 
@@ -181,14 +182,14 @@ namespace WarehouseManagementSystem.Forms
             }
             else
             {
-                MessageBox.Show("Выберите позицию для удаления");
+                MessageBox.Show(String.SelectItemToDelete);
             }
         }
 
         private void btnRefreshStock_Click(object sender, EventArgs e)
         {
             RefreshStock();
-            MessageBox.Show("Список остатков обновлен");
+            MessageBox.Show(String.StockRefreshed);
         }
 
         private void btnConfirm_Click(object sender, EventArgs e)
@@ -196,15 +197,15 @@ namespace WarehouseManagementSystem.Forms
              
             if (Session.CurrentUser == null)
             {
-                MessageBox.Show("Ошибка: пользователь не авторизован!");
+                MessageBox.Show(String.UserNotAuthorized);
                 return;
             }
 
-            MessageBox.Show($"ID пользователя: {Session.CurrentUser.Id}\nИмя: {Session.CurrentUser.FullName}", "Проверка");
+            MessageBox.Show(string.Format(String.UserInfoMessage, Session.CurrentUser.Id, Session.CurrentUser.FullName), String.UserCheckTitle);
 
             if (_cartTable.Rows.Count == 0)
             {
-                MessageBox.Show("Добавьте товары в отгрузку");
+                MessageBox.Show(String.AddProductsToShipment);
                 return;
             }
 
@@ -214,8 +215,8 @@ namespace WarehouseManagementSystem.Forms
                 itemsList += $"- {row["Name"]}: {row["Quantity"]} шт.\n";
             }
 
-            var confirm = MessageBox.Show($"{itemsList}\nПодтвердить отгрузку? Товары будут списаны.",
-                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = MessageBox.Show(string.Format(String.ConfirmShipmentMessage, itemsList),
+    String.ConfirmShipmentTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (confirm != DialogResult.Yes) return;
 
@@ -236,7 +237,7 @@ namespace WarehouseManagementSystem.Forms
                             cmd.Parameters.AddWithValue("@Date", DateTime.Now);
                             cmd.Parameters.AddWithValue("@StorekeeperId", Session.CurrentUser.Id);
                             shipmentId = Convert.ToInt32(cmd.ExecuteScalar());
-                            MessageBox.Show($"Создана отгрузка ID={shipmentId}");
+                            MessageBox.Show(string.Format(String.ShipmentCreated, shipmentId));
                         }
  
                         foreach (DataRow row in _cartTable.Rows)
@@ -260,20 +261,20 @@ namespace WarehouseManagementSystem.Forms
                             try
                             {
                                 ShipProduct(productId, quantity);
-                                MessageBox.Show($"Списано {quantity} шт. товара {productName} (FIFO)");
+                                MessageBox.Show(string.Format(String.ItemsWrittenOffFifo, quantity, productName));
                             }
                             catch (Exception ex)
                             {
-                                MessageBox.Show($"Ошибка списания {productName}: {ex.Message}");
+                                MessageBox.Show(string.Format(String.WriteOffError, productName, ex.Message));
                                 throw;
                             }
                         }
                         tran.Commit();
-                        MessageBox.Show("Транзакция завершена!");
+                        MessageBox.Show(String.TransactionCompleted);
                     }
                 }
 
-                MessageBox.Show($"Отгрузка №{_shipmentNumber} проведена!");
+                MessageBox.Show(string.Format(String.ShipmentCompleted, _shipmentNumber));
 
                 _cartTable.Clear();
                 RefreshStock();
@@ -281,7 +282,7 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"❌ Ошибка: {ex.Message}");
+                MessageBox.Show(string.Format(String.ErrorPrefix, ex.Message));
             }
 
 

@@ -11,12 +11,12 @@
 
         public static bool IsAdmin
         {
-            get { return CurrentUser != null && CurrentUser.Role == "Admin"; }
+            get { return CurrentUser != null && CurrentUser.Role == UserRole.Admin; }
         }
 
         public static bool IsStorekeeper
         {
-            get { return CurrentUser != null && CurrentUser.Role == "Storekeeper"; }
+            get { return CurrentUser != null && CurrentUser.Role == UserRole.Storekeeper; }
         }
 
         public static void Clear()

@@ -93,5 +93,11 @@ namespace WarehouseManagementSystem.Forms
             FormWriteOffExpired form = new FormWriteOffExpired();
             form.ShowDialog();
         }
+
+        private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormSettings settingsForm = new FormSettings();
+            settingsForm.ShowDialog();
+        }
     }
 }

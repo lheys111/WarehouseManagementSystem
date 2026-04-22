@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Data;
 using System.Drawing;
@@ -69,16 +70,13 @@ namespace WarehouseManagementSystem.Forms
             this.Text = "Выбор товара и количества";
             this.StartPosition = FormStartPosition.CenterParent;
 
-            // Привязка событий
             btnSearch.Click += BtnSearch_Click;
             btnAdd.Click += BtnAdd_Click;
             btnCancel.Click += BtnCancel_Click;
-            //dgvProducts.SelectionChanged += DgvProducts_SelectionChanged;
             txtQuantity.TextChanged += TxtQuantity_TextChanged;
             txtQuantity.KeyPress += TxtQuantity_KeyPress;
             dgvProducts.CellDoubleClick += DgvProducts_CellDoubleClick;
 
-            // Настройка кнопок
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.FlatAppearance.BorderColor = Color.Black;
             btnSearch.FlatAppearance.BorderSize = 1;
@@ -137,7 +135,7 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки: " + ex.Message);
+                MessageBox.Show(string.Format(String.LoadError, ex.Message));
             }
         }
 
@@ -204,31 +202,32 @@ namespace WarehouseManagementSystem.Forms
         {
             if (_selectedProductId == -1)
             {
-                MessageBox.Show("Выберите товар из списка");
+                MessageBox.Show(String.SelectProductFromList);
                 return;
             }
 
             if (string.IsNullOrEmpty(txtQuantity.Text))
             {
-                MessageBox.Show("Введите количество");
+                MessageBox.Show(String.EnterQuantity);
                 return;
             }
 
             if (!decimal.TryParse(txtQuantity.Text, out var quantity))
             {
-                MessageBox.Show("Введите корректное количество");
+                MessageBox.Show(String.EnterValidQuantity);
                 return;
             }
 
             if (quantity <= 0)
             {
-                MessageBox.Show("Количество должно быть больше нуля");
+                MessageBox.Show(String.QuantityMustBePositive);
                 return;
+              
             }
 
             if (quantity > _availableStock)
             {
-                MessageBox.Show($"Недостаточно товара. Доступно: {_availableStock}");
+                MessageBox.Show(string.Format(String.InsufficientStock, _availableStock));
                 return;
             }
 

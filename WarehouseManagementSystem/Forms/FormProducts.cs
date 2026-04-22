@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
+using System;
 using System.Data;
-using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 
@@ -156,8 +157,8 @@ namespace WarehouseManagementSystem.Forms
             var productId = Convert.ToInt32(dgvProducts.CurrentRow.Cells["Id"].Value);
             var productName = dgvProducts.CurrentRow.Cells["Name"].Value.ToString();
 
-            var confirm = MessageBox.Show($"Удалить товар '{productName}'? {Constants.Messages.DeleteConfirm}",
-                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = MessageBox.Show(string.Format(String.DeleteProductConfirm, productName),
+    String.ConfirmTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (confirm != DialogResult.Yes) return;
 

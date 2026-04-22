@@ -1,10 +1,13 @@
 ﻿using Npgsql;
+using OfficeOpenXml;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,18 +57,18 @@ namespace WarehouseManagementSystem.Forms
         }
         private void btnAddItem_Click(object sender, EventArgs e)
         {
-            using (var selectForm = new FormChooseProduct()) 
+            using (var selectForm = new FormChooseProduct())
             {
                 if (selectForm.ShowDialog() == DialogResult.OK)
                 {
                     ProductDto product = selectForm.SelectedProduct;
-                    MessageBox.Show($"Добавлен товар: ID={product.Id}, Название={product.Name}");
+                    MessageBox.Show(string.Format(String.ProductAddedInfo, product.Id, product.Name));
 
                     foreach (DataRow row in itemsTable.Rows)
                     {
                         if (Convert.ToInt32(row["ProductId"]) == product.Id)
                         {
-                            MessageBox.Show("Этот товар уже добавлен");
+                            MessageBox.Show(String.ProductAlreadyAdded);
                             return;
                         }
                     }
@@ -75,10 +78,28 @@ namespace WarehouseManagementSystem.Forms
                         product.Article,
                         product.Name,
                         1,
-                        product.PurchasePrice,
-                        DBNull.Value
+                        product.PurchasePrice
                     );
                 }
+            }
+        }
+
+        private DateTime? GetProductExpiryDate(int productId)
+        {
+            try
+            {
+                string sql = "SELECT ExpiryDate FROM Products WHERE Id = @id";
+                var param = new NpgsqlParameter("@id", productId);
+                var result = DatabaseHelper.ExecuteScalar(sql, new[] { param });
+
+                if (result == null || result == DBNull.Value)
+                    return null;
+
+                return Convert.ToDateTime(result);
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
         private void CreateItemsTable()
@@ -90,8 +111,7 @@ namespace WarehouseManagementSystem.Forms
             itemsTable.Columns.Add("ProductName", typeof(string));
             itemsTable.Columns.Add("Quantity", typeof(decimal)); 
             itemsTable.Columns.Add("PurchasePrice", typeof(decimal));
-            itemsTable.Columns.Add("ExpiryDate", typeof(DateTime));
-
+          
             dgvItems.DataSource = itemsTable;
 
             dgvItems.Columns["ProductId"].Visible = false;      
@@ -99,9 +119,7 @@ namespace WarehouseManagementSystem.Forms
             dgvItems.Columns["ProductName"].HeaderText = "Название";
             dgvItems.Columns["Quantity"].HeaderText = "Кол-во";
             dgvItems.Columns["PurchasePrice"].HeaderText = "Цена";
-            dgvItems.Columns["ExpiryDate"].HeaderText = "Срок годности";
-            dgvItems.Columns["ExpiryDate"].DefaultCellStyle.Format = "dd.MM.yyyy";
-
+           
 
         }
 
@@ -109,8 +127,8 @@ namespace WarehouseManagementSystem.Forms
         {
             if (itemsTable.Rows.Count == 0)
             {
-                MessageBox.Show("Добавьте хотя бы один товар", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(String.AddProductsFirst, String.ErrorTitle,
+    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -121,15 +139,15 @@ namespace WarehouseManagementSystem.Forms
 
                 if (quantity <= 0)
                 {
-                    MessageBox.Show("Количество должно быть больше 0", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(String.QuantityMustBePositive, String.ErrorTitle,
+    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 if (price <= 0)
                 {
-                    MessageBox.Show("Цена должна быть больше 0", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(String.PriceMustBePositive, String.ErrorTitle,
+    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
@@ -166,20 +184,21 @@ namespace WarehouseManagementSystem.Forms
                             decimal quantity = Convert.ToDecimal(row["Quantity"]);
                             decimal price = Convert.ToDecimal(row["PurchasePrice"]);
 
-                            
                             string sqlDetail = @"
-                INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment)
-                VALUES (@shipmentId, @productId, @quantity, @price)";
+            INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment)
+            VALUES (@shipmentId, @productId, @quantity, @price)";
+
                             using (var cmd = new NpgsqlCommand(sqlDetail, conn, transaction))
                             {
                                 cmd.Parameters.AddWithValue("@shipmentId", shipmentId);
                                 cmd.Parameters.AddWithValue("@productId", productId);
                                 cmd.Parameters.AddWithValue("@quantity", quantity);
                                 cmd.Parameters.AddWithValue("@price", price);
+
                                 cmd.ExecuteNonQuery();
                             }
 
-                            
+
                             string sqlUpdate = "UPDATE StockBalances SET Quantity = Quantity + @quantity WHERE ProductId = @productId";
                             using (var cmd = new NpgsqlCommand(sqlUpdate, conn, transaction))
                             {
@@ -199,44 +218,31 @@ namespace WarehouseManagementSystem.Forms
                                 }
                             }
 
-                            /*
-                             string sqlBatch = @"
-                 INSERT INTO StockBatches (ProductId, Quantity, PurchasePrice, ExpiryDate, ReceivedDate, ShipmentId)
-                 VALUES (@productId, @quantity, @price, @expiryDate, @receivedDate, @shipmentId)";
-                             using (var cmd = new NpgsqlCommand(sqlBatch, conn, transaction))
-                             {
-                                 cmd.Parameters.AddWithValue("@productId", productId);
-                                 cmd.Parameters.AddWithValue("@quantity", quantity);
-                                 cmd.Parameters.AddWithValue("@price", price);
-                                 cmd.Parameters.AddWithValue("@expiryDate", GetExpiryDate(productId) ?? (object)DBNull.Value);
-                                 cmd.Parameters.AddWithValue("@receivedDate", dtpSupplyDate.Value);
-                                 cmd.Parameters.AddWithValue("@shipmentId", shipmentId);
-                                 cmd.ExecuteNonQuery(); 
-                             }*/
+                           
                         }
                         
 
                         Debug.WriteLine($"ShipmentId: {shipmentId}");
                         Debug.WriteLine($"Items added: {itemsTable.Rows.Count}");
-                        /*foreach (DataRow row in itemsTable.Rows)
+                        foreach (DataRow row in itemsTable.Rows)
                         {
                             Debug.WriteLine($"Product: {row["ProductName"]}, Qty: {row["Quantity"]}, Price: {row["PurchasePrice"]}");
-                        }*/
+                        }
                         transaction.Commit();
-                        MessageBox.Show("Поставка успешно сохранена!", "Успех",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(String.SupplySavedSuccess, String.SuccessTitle,
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Close();
                     }
                 }
             }
             catch (PostgresException ex)
             {
-                MessageBox.Show($"Ошибка PostgreSQL: {ex.Message}\nТаблица: {ex.TableName}\nПодробности: {ex.Detail}", "Ошибка");
+                MessageBox.Show(string.Format(String.PostgresError, ex.Message, ex.TableName, ex.Detail), String.ErrorTitle);
                 return;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
+                MessageBox.Show(string.Format(String.GenericError, ex.Message), String.ErrorTitle);
             }
         }
         private DateTime? GetExpiryDate(int productId)
@@ -245,6 +251,150 @@ namespace WarehouseManagementSystem.Forms
             var param = new[] { new NpgsqlParameter("@productId", productId) };
             var result = DatabaseHelper.ExecuteScalar(sql, param);
             return result != null && result != DBNull.Value ? Convert.ToDateTime(result) : (DateTime?)null;
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "CSV файлы (*.csv)|*.csv|Excel файлы (*.xlsx)|*.xlsx";
+            openFileDialog.Title = "Выберите файл";
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string file = openFileDialog.FileName;
+
+                if (file.EndsWith(".csv"))
+                {
+                    ImportFromCsv(file);
+                }
+                else if (file.EndsWith(".xlsx"))
+                {
+                    ImportFromExcel(file);
+                }
+                else
+                {
+                    MessageBox.Show(String.ImportWrongFormat);
+                }
+            }
+        }
+
+        private void ImportFromCsv(string file)
+        {
+            string[] lines = File.ReadAllLines(file);
+            int lineNumber = 0;
+            int added = 0;
+            int errors = 0;
+
+            foreach (string line in lines)
+            {
+                lineNumber++;
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                string[] parts = line.Split(';');
+
+                if (parts.Length != 3)
+                {
+                    MessageBox.Show(string.Format(String.ImportCsvWrongColumns, lineNumber));
+                    errors++;
+                    continue;
+                }
+
+                string article = parts[0].Trim();
+
+                decimal quantity;
+                if (!decimal.TryParse(parts[1].Trim(), out quantity))
+                {
+                    MessageBox.Show(string.Format(String.ImportInvalidQuantity, lineNumber, parts[1]));
+                    errors++;
+                    continue;
+                }
+
+                decimal price;
+                if (!decimal.TryParse(parts[2].Trim(), out price))
+                {
+                    MessageBox.Show(string.Format(String.ImportInvalidPrice, lineNumber, parts[2]));
+                    errors++;
+                    continue;
+                }
+
+                string sql = "SELECT Id, Article, Name FROM Products WHERE Article = @art";
+                var param = new NpgsqlParameter("@art", article);
+                var data = DatabaseHelper.ExecuteQuery(sql, new[] { param });
+
+                if (data.Rows.Count == 0)
+                {
+                    MessageBox.Show(string.Format(String.ImportArticleNotFound, lineNumber, article));
+                    errors++;
+                    errors++;
+                    continue;
+                }
+
+                int productId = Convert.ToInt32(data.Rows[0]["Id"]);
+                string productArticle = data.Rows[0]["Article"].ToString();
+                string productName = data.Rows[0]["Name"].ToString();
+
+                itemsTable.Rows.Add(productId, productArticle, productName, quantity, price);
+                added++;
+            }
+
+            MessageBox.Show(string.Format(String.ImportCompleted, added, errors));
+        }
+
+        private void ImportFromExcel(string file)
+        {
+            using (var package = new ExcelPackage(new FileInfo(file)))
+            {
+                var sheet = package.Workbook.Worksheets[0];
+                int rowCount = sheet.Dimension.Rows;
+
+                int added = 0;
+                int errors = 0;
+
+                for (int i = 2; i <= rowCount; i++)
+                {
+                    string article = sheet.Cells[i, 1].Text.Trim();
+                    if (string.IsNullOrEmpty(article)) continue;
+
+                    string quantityStr = sheet.Cells[i, 2].Text.Trim();
+                    string priceStr = sheet.Cells[i, 3].Text.Trim();
+
+                    decimal quantity;
+                    if (!decimal.TryParse(quantityStr, out quantity))
+                    {
+                        MessageBox.Show(string.Format(String.ImportInvalidQuantity, i, quantityStr));
+                        errors++;
+                        continue;
+                    }
+
+                    decimal price;
+                    if (!decimal.TryParse(priceStr, out price))
+                    {
+                        MessageBox.Show(string.Format(String.ImportInvalidPrice, i, priceStr));
+                        errors++;
+                        continue;
+                    }
+
+                    string sql = "SELECT Id, Article, Name FROM Products WHERE Article = @art";
+                    var param = new NpgsqlParameter("@art", article);
+                    var data = DatabaseHelper.ExecuteQuery(sql, new[] { param });
+
+                    if (data.Rows.Count == 0)
+                    {
+                        MessageBox.Show(string.Format(String.ImportArticleNotFound, i, article));
+                        errors++;
+                        continue;
+                    }
+
+                    int productId = Convert.ToInt32(data.Rows[0]["Id"]);
+                    string productArticle = data.Rows[0]["Article"].ToString();
+                    string productName = data.Rows[0]["Name"].ToString();
+
+                    itemsTable.Rows.Add(productId, productArticle, productName, quantity, price);
+                    added++;
+                }
+
+                MessageBox.Show(string.Format(String.ImportCompleted, added, errors));
+            }
         }
     }
 

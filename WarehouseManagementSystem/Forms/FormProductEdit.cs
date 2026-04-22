@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
+using System;
 using System.Data;
-using Npgsql;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 
@@ -104,7 +105,7 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки: " + ex.Message);
+                MessageBox.Show(string.Format(String.LoadError, ex.Message));
             }
         }
 
@@ -113,21 +114,21 @@ namespace WarehouseManagementSystem.Forms
          
             if (string.IsNullOrEmpty(txtArticle.Text))
             {
-                MessageBox.Show("Введите артикул товара!");
+                MessageBox.Show(String.EnterArticle);
                 txtArticle.Focus();
                 return;
             }
 
             if (string.IsNullOrEmpty(txtName.Text))
             {
-                MessageBox.Show("Введите название товара!");
+                MessageBox.Show(String.EnterName);
                 txtName.Focus();
                 return;
             }
 
             if (string.IsNullOrEmpty(txtUnit.Text))
             {
-                MessageBox.Show("Введите единицу измерения!");
+                MessageBox.Show(String.EnterUnit);
                 txtUnit.Focus();
                 return;
             }
@@ -135,14 +136,14 @@ namespace WarehouseManagementSystem.Forms
             decimal price;
             if (!decimal.TryParse(txtPrice.Text, out price))
             {
-                MessageBox.Show("Введите корректную цену!");
+                MessageBox.Show(String.EnterValidPrice);
                 txtPrice.Focus();
                 return;
             }
 
             if (price <= 0)
             {
-                MessageBox.Show("Цена должна быть больше нуля!");
+                MessageBox.Show(String.PriceMustBePositive);
                 txtPrice.Focus();
                 return;
             }
@@ -181,7 +182,7 @@ namespace WarehouseManagementSystem.Forms
                     };
 
                     DatabaseHelper.ExecuteNonQuery(sql, parameters);
-                    MessageBox.Show("Товар успешно обновлен!");
+                    MessageBox.Show(String.ProductUpdatedSuccess);
                 }
                 else
                 {
@@ -206,7 +207,7 @@ namespace WarehouseManagementSystem.Forms
                     var stockParams = new[] { new NpgsqlParameter("@ProductId", newId) };
                     DatabaseHelper.ExecuteNonQuery(stockSql, stockParams);
 
-                    MessageBox.Show("Товар успешно добавлен!");
+                    MessageBox.Show(String.ProductUpdatedSuccess);
                 }
 
                 this.DialogResult = DialogResult.OK;
@@ -214,7 +215,7 @@ namespace WarehouseManagementSystem.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при сохранении: " + ex.Message);
+                MessageBox.Show(string.Format(String.SaveErrorWithDetails, ex.Message));
             }
         }
 

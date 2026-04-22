@@ -14,6 +14,7 @@ namespace WarehouseManagementSystem.Forms
             InitializeEvents();
             LoadStock();
             Text = Constants.FormTitles.StockBalances;
+            dgvStock.CellDoubleClick += dgvStock_CellDoubleClick;
         }
 
         private void InitializeEvents()
@@ -25,8 +26,8 @@ namespace WarehouseManagementSystem.Forms
         {
             try
             {
-                var sql = @"SELECT Article, Name, Category, UnitOfMeasure, StockQuantity, PurchasePrice
-                           FROM vw_StockForStorekeeper";
+                var sql = @"SELECT Id, Article, Name, Category, UnitOfMeasure, StockQuantity, PurchasePrice
+            FROM vw_StockForStorekeeper";
 
                 if (!string.IsNullOrEmpty(searchText))
                 {
@@ -81,5 +82,18 @@ namespace WarehouseManagementSystem.Forms
         {
 
         }
+
+        private void dgvStock_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                int productId = Convert.ToInt32(dgvStock.Rows[e.RowIndex].Cells["Id"].Value);
+                string productName = dgvStock.Rows[e.RowIndex].Cells["Name"].Value.ToString();
+
+                FormBatchDetails batchForm = new FormBatchDetails(productId, productName);
+                batchForm.ShowDialog();
+            }
+        }
+
     }
 }

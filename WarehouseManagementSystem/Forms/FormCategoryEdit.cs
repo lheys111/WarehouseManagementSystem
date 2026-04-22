@@ -1,5 +1,6 @@
-﻿using System;
-using Npgsql;
+﻿using Npgsql;
+using Org.BouncyCastle.Utilities;
+using System;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 
@@ -36,7 +37,7 @@ namespace WarehouseManagementSystem.Forms
         {
             if (string.IsNullOrEmpty(txtName.Text))
             {
-                MessageBox.Show("Введите название категории", Text,
+                MessageBox.Show(String.CategoryNameError, Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }

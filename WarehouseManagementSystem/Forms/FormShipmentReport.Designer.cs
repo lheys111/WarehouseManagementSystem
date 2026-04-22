@@ -76,6 +76,7 @@
             this.btnExport.TabIndex = 3;
             this.btnExport.Text = "Экспорт";
             this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click_1);
             // 
             // lblTitle
             // 
