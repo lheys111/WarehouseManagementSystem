@@ -99,5 +99,7 @@ namespace WarehouseManagementSystem.Forms
             FormSettings settingsForm = new FormSettings();
             settingsForm.ShowDialog();
         }
+
+       
     }
 }
