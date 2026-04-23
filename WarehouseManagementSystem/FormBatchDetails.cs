@@ -19,14 +19,14 @@ namespace WarehouseManagementSystem
         {
             string sql = @"
         SELECT 
-            Id AS Id,
-            Quantity AS Quantity,
-            PurchasePrice AS PurchasePrice,
-            ExpiryDate AS ExpiryDate,
-            ReceivedDate AS ReceivedDate
+        Id AS Id,
+        Quantity AS Quantity,
+        PurchasePrice AS PurchasePrice,
+        ExpiryDate AS ExpiryDate,
+        ReceivedDate AS ReceivedDate
         FROM StockBatches
         WHERE ProductId = @pid AND Quantity > 0
-        ORDER BY ExpiryDate ASC NULLS LAST, ReceivedDate ASC";
+         ORDER BY ExpiryDate ASC NULLS LAST, ReceivedDate ASC";
 
             var param = new NpgsqlParameter("@pid", productId);
             DataTable data = DatabaseHelper.ExecuteQuery(sql, new[] { param });

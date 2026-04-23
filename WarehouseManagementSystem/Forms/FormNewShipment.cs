@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Utilities;
 using System;
 using System.Data;
@@ -136,7 +137,13 @@ namespace WarehouseManagementSystem.Forms
         private void GenerateShipmentNumber()
         {
             string datePart = DateTime.Now.ToString("yyyyMMdd");
-            _shipmentNumber = $"SHP-{datePart}-001";
+
+            string sql = "SELECT COUNT(*) FROM Shipments WHERE ShipmentNumber LIKE @pattern";
+            var param = new NpgsqlParameter("@pattern", $"SHP-{datePart}-%");
+            int count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql, new[] { param }));
+
+            int nextNumber = count + 1;
+            _shipmentNumber = $"SHP-{datePart}-{nextNumber:D3}";
             lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
         }
 
@@ -165,9 +172,22 @@ namespace WarehouseManagementSystem.Forms
                     return;
                 }
 
-                _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, 0);
+                decimal purchasePrice = GetProductPrice(selected.ProductId);
+                int markupPercent = GetMarkupPercent();
+                decimal salePrice = purchasePrice * (1 + markupPercent / 100m);
+                _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, salePrice);
                 MessageBox.Show(string.Format(String.ProductAddedToShipment, selected.Name, selected.Quantity));
+
+
             }
+        }
+
+        private decimal GetProductPrice(int productId)
+        {
+            string sql = "SELECT PurchasePrice FROM Products WHERE Id = @id";
+            var param = new NpgsqlParameter("@id", productId);
+            var result = DatabaseHelper.ExecuteScalar(sql, new[] { param });
+            return result != null ? Convert.ToDecimal(result) : 0;
         }
 
         private void btnRemoveItem_Click(object sender, EventArgs e)
@@ -244,16 +264,19 @@ namespace WarehouseManagementSystem.Forms
                         {
                             var productId = Convert.ToInt32(row["ProductId"]);
                             var quantity = Convert.ToDecimal(row["Quantity"]);
+                            var price = Convert.ToDecimal(row["Price"]);
                             var productName = row["Name"].ToString();
 
-                        
+
+
                             string detailSql = @"INSERT INTO ShipmentDetails (ShipmentId, ProductId, Quantity, PriceAtShipment) 
-                                                VALUES (@ShipmentId, @ProductId, @Quantity, 0)";
+                            VALUES (@ShipmentId, @ProductId, @Quantity, @Price)";
                             using (var detailCmd = new NpgsqlCommand(detailSql, conn, tran))
                             {
                                 detailCmd.Parameters.AddWithValue("@ShipmentId", shipmentId);
                                 detailCmd.Parameters.AddWithValue("@ProductId", productId);
                                 detailCmd.Parameters.AddWithValue("@Quantity", quantity);
+                                detailCmd.Parameters.AddWithValue("@Price", price);
                                 detailCmd.ExecuteNonQuery();
                             }
 
@@ -347,5 +370,20 @@ namespace WarehouseManagementSystem.Forms
         new NpgsqlParameter("@pid", productId)
     });
         }
+        private int GetMarkupPercent()
+        {
+            try
+            {
+                string sql = "SELECT SettingValue FROM AppSettings WHERE SettingKey = 'MarkupPercent'";
+                var result = DatabaseHelper.ExecuteScalar(sql);
+                return result != null ? Convert.ToInt32(result) : 20;
+            }
+            catch
+            {
+                return 20;
+            }
+        }
+
+
     }
 }
