@@ -15,6 +15,10 @@ namespace WarehouseManagementSystem
             LoadBatches(productId);
         }
 
+        /// <summary>
+        /// Загружает список партий товара из базы данных.
+        /// Показываются только партии с положительным остатком.
+        /// </summary>
         private void LoadBatches(int productId)
         {
             string sql = @"
@@ -29,7 +33,7 @@ namespace WarehouseManagementSystem
          ORDER BY ExpiryDate ASC NULLS LAST, ReceivedDate ASC";
 
             var param = new NpgsqlParameter("@pid", productId);
-            DataTable data = DatabaseHelper.ExecuteQuery(sql, new[] { param });
+            var data = DatabaseHelper.ExecuteQuery(sql, new[] { param });
             dgvBatches.DataSource = data;
 
             if (dgvBatches.Columns.Contains("Id"))
@@ -54,9 +58,5 @@ namespace WarehouseManagementSystem
             dgvBatches.AllowUserToAddRows = false;
         }
 
-        private void FormBatchDetails_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

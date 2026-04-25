@@ -26,17 +26,20 @@ namespace WarehouseManagementSystem
             LoadSettings();
         }
 
+        /// <summary>
+        /// Загружает настройки скидки из таблицы AppSettings.
+        /// </summary>
         private void LoadSettings()
         {
             try
             {
                 string sql = "SELECT SettingKey, SettingValue FROM AppSettings";
-                DataTable data = DatabaseHelper.ExecuteQuery(sql);
+                var data = DatabaseHelper.ExecuteQuery(sql);
 
                 foreach (DataRow row in data.Rows)
                 {
-                    string key = row["SettingKey"].ToString();
-                    string value = row["SettingValue"].ToString();
+                    var key = row["SettingKey"].ToString();
+                    var value = row["SettingValue"].ToString();
 
                     if (key == "DiscountPercentage")
                         numDiscountPercent.Value = Convert.ToInt32(value);
@@ -51,6 +54,11 @@ namespace WarehouseManagementSystem
             }
         }
 
+
+        /// <summary>
+        /// Обработчик нажатия кнопки "Сохранить".
+        /// Сохраняет настройки в базу данных и закрывает форму.
+        /// </summary>
         private void btnSave_Click(object sender, EventArgs e)
         {
             try
@@ -76,6 +84,11 @@ namespace WarehouseManagementSystem
             this.Close();
         }
 
+
+        /// <summary>
+        /// Сохраняет настройку в таблицу AppSettings.
+        /// Если ключ существует - обновляет значение, иначе - создаёт новую запись.
+        /// </summary>
         private void SaveSetting(string key, string value)
         {
             string sql = @"

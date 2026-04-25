@@ -82,7 +82,7 @@
             this.Controls.Add(this.dgvProducts);
             this.Name = "FormChooseProduct";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.FormChooseProduct_Load);
+           
             ((System.ComponentModel.ISupportInitialize)(this.dgvProducts)).EndInit();
             this.ResumeLayout(false);
 

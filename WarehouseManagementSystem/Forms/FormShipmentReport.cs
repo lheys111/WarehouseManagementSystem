@@ -66,7 +66,7 @@ namespace WarehouseManagementSystem.Forms
                     new NpgsqlParameter("@endDate",  dateEnd.Value.Date)
                 };
 
-                DataTable data = DatabaseHelper.ExecuteQuery(sql, parameters);
+                var data = DatabaseHelper.ExecuteQuery(sql, parameters);
                 dgvReport.DataSource = data;
 
                 ConfigureGrid();
