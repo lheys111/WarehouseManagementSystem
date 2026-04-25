@@ -24,6 +24,10 @@ namespace WarehouseManagementSystem
             dgvExpiredProducts.SelectionChanged += DgvExpiredProducts_SelectionChanged;
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки "Списать выбранные".
+        /// Списывает выбранные просроченные товары.
+        /// </summary>
         private void btnWriteOffSelected_Click(object sender, EventArgs e)
         {
             var selectedRows = dgvExpiredProducts.Rows
@@ -42,13 +46,13 @@ namespace WarehouseManagementSystem
 
             if (confirm != DialogResult.Yes) return;
 
-            int successCount = 0;
+            var successCount = 0;
             foreach (var row in selectedRows)
             {
-                int batchId = Convert.ToInt32(row.Cells["BatchId"].Value);
-                int productId = Convert.ToInt32(row.Cells["ProductId"].Value);
-                decimal quantity = Convert.ToDecimal(row.Cells["Quantity"].Value);
-                decimal lossAmount = Convert.ToDecimal(row.Cells["LossAmount"].Value);
+                var batchId = Convert.ToInt32(row.Cells["BatchId"].Value);
+                var productId = Convert.ToInt32(row.Cells["ProductId"].Value);
+                var quantity = Convert.ToDecimal(row.Cells["Quantity"].Value);
+                var lossAmount = Convert.ToDecimal(row.Cells["LossAmount"].Value);
 
                 if (WriteOffBatch(batchId, productId, quantity, lossAmount))
                     successCount++;
@@ -58,12 +62,19 @@ namespace WarehouseManagementSystem
             LoadExpiredProducts();
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки "Обновить".
+        /// Обновляет список просроченных товаров.
+        /// </summary>
         private void btnRefresh_Click(object sender, EventArgs e)
         {
             LoadExpiredProducts();
             MessageBox.Show(String.ListRefreshed);
         }
 
+        /// <summary>
+        /// Загружает список просроченных товаров из базы данных.
+        /// </summary>
         private void LoadExpiredProducts()
         {
             string sql = @"
@@ -109,6 +120,9 @@ namespace WarehouseManagementSystem
             UpdateSelectedInfo();
         }
 
+        /// <summary>
+        /// Обновляет информацию о выбранных товарах (количество и сумма убытка).
+        /// </summary>
         private void UpdateSelectedInfo()
         {
             int selectedCount = 0;
@@ -126,6 +140,10 @@ namespace WarehouseManagementSystem
             lblSelectedInfo.Text = $"Выбрано товаров: {selectedCount}, сумма убытка: {totalLoss:N2} руб.";
         }
 
+        /// <summary>
+        /// Выполняет списание просроченной партии.
+        /// Записывает убыток, удаляет партию и уменьшает общий остаток.
+        /// </summary>
         private bool WriteOffBatch(int batchId, int productId, decimal quantity, decimal lossAmount)
         {
             try
@@ -174,6 +192,7 @@ namespace WarehouseManagementSystem
                 return false;
             }
         }
+
 
         private void dgvExpiredProducts_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {

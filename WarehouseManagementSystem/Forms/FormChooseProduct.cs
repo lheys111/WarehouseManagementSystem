@@ -21,6 +21,10 @@ namespace WarehouseManagementSystem.Forms
             LoadProducts();
         }
 
+        /// <summary>
+        /// Загружает список товаров из базы данных.
+        /// Отображает общий остаток и разбивку по партиям.
+        /// </summary>
         private void LoadProducts()
         {
             string sql = @"
@@ -43,7 +47,7 @@ namespace WarehouseManagementSystem.Forms
         GROUP BY p.Id, p.Article, p.Name, p.PurchasePrice
         ORDER BY p.Name";
 
-            DataTable data = DatabaseHelper.ExecuteQuery(sql);
+            var data = DatabaseHelper.ExecuteQuery(sql);
 
             dgvProducts.AutoGenerateColumns = false;
             dgvProducts.Columns.Clear();
@@ -61,11 +65,10 @@ namespace WarehouseManagementSystem.Forms
             dgvProducts.Columns["TotalStock"].DefaultCellStyle.Format = "N2";
         }
 
-        private void FormChooseProduct_Load(object sender, EventArgs e)
-        {
-
-        }
-
+        /// <summary>
+        /// Обработчик нажатия кнопки "Выбрать".
+        /// Сохраняет выбранный товар и закрывает форму.
+        /// </summary>
         private void btnSelect_Click(object sender, EventArgs e)
         {
             if (dgvProducts.CurrentRow != null)

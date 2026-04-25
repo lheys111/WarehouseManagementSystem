@@ -140,9 +140,9 @@ namespace WarehouseManagementSystem.Forms
 
             string sql = "SELECT COUNT(*) FROM Shipments WHERE ShipmentNumber LIKE @pattern";
             var param = new NpgsqlParameter("@pattern", $"SHP-{datePart}-%");
-            int count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql, new[] { param }));
+            var count = Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql, new[] { param }));
 
-            int nextNumber = count + 1;
+            var nextNumber = count + 1;
             _shipmentNumber = $"SHP-{datePart}-{nextNumber:D3}";
             lblDocNumber.Text = $"Номер документа: {_shipmentNumber}";
         }
@@ -172,9 +172,9 @@ namespace WarehouseManagementSystem.Forms
                     return;
                 }
 
-                decimal purchasePrice = GetProductPrice(selected.ProductId);
+                var purchasePrice = GetProductPrice(selected.ProductId);
                 int markupPercent = GetMarkupPercent();
-                decimal salePrice = purchasePrice * (1 + markupPercent / 100m);
+                var salePrice = purchasePrice * (1 + markupPercent / 100m);
                 _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, salePrice);
                 MessageBox.Show(string.Format(String.ProductAddedToShipment, selected.Name, selected.Quantity));
 

@@ -26,6 +26,11 @@ namespace WarehouseManagementSystem.Forms
         {
             btnViewDetails.Click += btnViewDetails_Click;
         }
+
+        /// <summary>
+        /// Загружает список отгрузок из базы данных.
+        /// Для кладовщика - только свои отгрузки, для администратора - все.
+        /// </summary>
         private void LoadShipments()
         {
             try
@@ -116,6 +121,10 @@ namespace WarehouseManagementSystem.Forms
             dgvShipments.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки "Просмотреть детали".
+        /// Открывает форму с детальной информацией об отгрузке.
+        /// </summary>
         private void btnViewDetails_Click(object sender, EventArgs e)
         {
             if (dgvShipments.CurrentRow == null)

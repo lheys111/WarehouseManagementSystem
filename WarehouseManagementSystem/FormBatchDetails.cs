@@ -15,6 +15,10 @@ namespace WarehouseManagementSystem
             LoadBatches(productId);
         }
 
+        /// <summary>
+        /// Загружает список партий товара из базы данных.
+        /// Показываются только партии с положительным остатком.
+        /// </summary>
         private void LoadBatches(int productId)
         {
             string sql = @"
@@ -54,9 +58,5 @@ namespace WarehouseManagementSystem
             dgvBatches.AllowUserToAddRows = false;
         }
 
-        private void FormBatchDetails_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }
