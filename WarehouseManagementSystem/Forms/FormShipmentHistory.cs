@@ -131,9 +131,5 @@ namespace WarehouseManagementSystem.Forms
             detailsForm.ShowDialog();
         }
 
-        private void FormShipmentHistory_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

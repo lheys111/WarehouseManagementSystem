@@ -29,7 +29,7 @@ namespace WarehouseManagementSystem
          ORDER BY ExpiryDate ASC NULLS LAST, ReceivedDate ASC";
 
             var param = new NpgsqlParameter("@pid", productId);
-            DataTable data = DatabaseHelper.ExecuteQuery(sql, new[] { param });
+            var data = DatabaseHelper.ExecuteQuery(sql, new[] { param });
             dgvBatches.DataSource = data;
 
             if (dgvBatches.Columns.Contains("Id"))

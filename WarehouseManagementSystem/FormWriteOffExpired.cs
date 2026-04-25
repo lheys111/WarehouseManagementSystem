@@ -81,7 +81,7 @@ namespace WarehouseManagementSystem
         WHERE sb.ExpiryDate < CURRENT_DATE AND sb.Quantity > 0
         ORDER BY sb.ExpiryDate ASC";
 
-            DataTable data = DatabaseHelper.ExecuteQuery(sql);
+            var data = DatabaseHelper.ExecuteQuery(sql);
             dgvExpiredProducts.DataSource = data;
 
             dgvExpiredProducts.Columns["BatchId"].Visible = false;

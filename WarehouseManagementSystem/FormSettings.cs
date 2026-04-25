@@ -31,7 +31,7 @@ namespace WarehouseManagementSystem
             try
             {
                 string sql = "SELECT SettingKey, SettingValue FROM AppSettings";
-                DataTable data = DatabaseHelper.ExecuteQuery(sql);
+                var data = DatabaseHelper.ExecuteQuery(sql);
 
                 foreach (DataRow row in data.Rows)
                 {
