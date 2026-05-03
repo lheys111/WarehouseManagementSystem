@@ -62,7 +62,7 @@
             this.btnGenerate.Name = "btnGenerate";
             this.btnGenerate.Size = new System.Drawing.Size(117, 31);
             this.btnGenerate.TabIndex = 2;
-            this.btnGenerate.Text = "Софрмировать";
+            this.btnGenerate.Text = "Сформировать";
             this.btnGenerate.UseVisualStyleBackColor = false;
             this.btnGenerate.Click += new System.EventHandler(this.btnGenerate_Click);
             // 
@@ -122,7 +122,6 @@
             this.Controls.Add(this.dateStart);
             this.Name = "FormShipmentReport";
             this.Text = "FormShipmentReport";
-            this.Load += new System.EventHandler(this.FormShipmentReport_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvReport)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

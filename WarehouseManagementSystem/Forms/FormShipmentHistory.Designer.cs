@@ -43,25 +43,25 @@
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(620, 33);
+            this.panel1.Size = new System.Drawing.Size(1644, 65);
             this.panel1.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(251, 9);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(761, 18);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(141, 16);
+            this.label1.Size = new System.Drawing.Size(173, 22);
             this.label1.TabIndex = 0;
             this.label1.Text = "История отгрузок";
             // 
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.panel2.Location = new System.Drawing.Point(0, 428);
+            this.panel2.Location = new System.Drawing.Point(0, 741);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(620, 25);
+            this.panel2.Size = new System.Drawing.Size(1644, 55);
             this.panel2.TabIndex = 0;
             // 
             // dgvShipments
@@ -69,19 +69,19 @@
             this.dgvShipments.BackgroundColor = System.Drawing.SystemColors.Control;
             this.dgvShipments.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvShipments.GridColor = System.Drawing.SystemColors.Control;
-            this.dgvShipments.Location = new System.Drawing.Point(28, 66);
+            this.dgvShipments.Location = new System.Drawing.Point(216, 117);
             this.dgvShipments.Name = "dgvShipments";
             this.dgvShipments.RowHeadersWidth = 51;
             this.dgvShipments.RowTemplate.Height = 24;
-            this.dgvShipments.Size = new System.Drawing.Size(569, 255);
+            this.dgvShipments.Size = new System.Drawing.Size(1181, 265);
             this.dgvShipments.TabIndex = 1;
             // 
             // btnViewDetails
             // 
             this.btnViewDetails.BackColor = System.Drawing.Color.MediumAquamarine;
-            this.btnViewDetails.Location = new System.Drawing.Point(28, 349);
+            this.btnViewDetails.Location = new System.Drawing.Point(216, 425);
             this.btnViewDetails.Name = "btnViewDetails";
-            this.btnViewDetails.Size = new System.Drawing.Size(182, 41);
+            this.btnViewDetails.Size = new System.Drawing.Size(202, 51);
             this.btnViewDetails.TabIndex = 2;
             this.btnViewDetails.Text = "Просмотреть детали";
             this.btnViewDetails.UseVisualStyleBackColor = false;
@@ -90,13 +90,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(619, 450);
+            this.ClientSize = new System.Drawing.Size(1656, 836);
             this.Controls.Add(this.btnViewDetails);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.dgvShipments);
             this.Controls.Add(this.panel1);
             this.Name = "FormShipmentHistory";
-            
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvShipments)).EndInit();

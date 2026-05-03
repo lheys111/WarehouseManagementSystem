@@ -35,6 +35,9 @@
             // 
             // dgvBatches
             // 
+            this.dgvBatches.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvBatches.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvBatches.Location = new System.Drawing.Point(156, 112);
             this.dgvBatches.Name = "dgvBatches";
@@ -45,6 +48,9 @@
             // 
             // lblTitle
             // 
+            this.lblTitle.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lblTitle.AutoSize = true;
             this.lblTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lblTitle.Location = new System.Drawing.Point(284, 54);
@@ -62,7 +68,6 @@
             this.Controls.Add(this.dgvBatches);
             this.Name = "FormBatchDetails";
             this.Text = "FormBatchDetails";
-            this.Load += new System.EventHandler(this.FormBatchDetails_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvBatches)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

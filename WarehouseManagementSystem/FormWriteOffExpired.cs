@@ -137,7 +137,7 @@ namespace WarehouseManagementSystem
                 }
             }
 
-            lblSelectedInfo.Text = $"Выбрано товаров: {selectedCount}, сумма убытка: {totalLoss:N2} руб.";
+           
         }
 
         /// <summary>
@@ -203,5 +203,6 @@ namespace WarehouseManagementSystem
         {
             UpdateSelectedInfo();
         }
+
     }
 }

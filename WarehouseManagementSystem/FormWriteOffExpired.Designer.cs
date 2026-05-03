@@ -31,7 +31,6 @@
             this.dgvExpiredProducts = new System.Windows.Forms.DataGridView();
             this.btnWriteOffSelected = new System.Windows.Forms.Button();
             this.btnRefresh = new System.Windows.Forms.Button();
-            this.lblSelectedInfo = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvExpiredProducts)).BeginInit();
             this.SuspendLayout();
@@ -39,12 +38,12 @@
             // dgvExpiredProducts
             // 
             this.dgvExpiredProducts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvExpiredProducts.Location = new System.Drawing.Point(82, 134);
+            this.dgvExpiredProducts.Location = new System.Drawing.Point(82, 128);
             this.dgvExpiredProducts.Margin = new System.Windows.Forms.Padding(4);
             this.dgvExpiredProducts.Name = "dgvExpiredProducts";
             this.dgvExpiredProducts.RowHeadersWidth = 51;
             this.dgvExpiredProducts.RowTemplate.Height = 24;
-            this.dgvExpiredProducts.Size = new System.Drawing.Size(813, 254);
+            this.dgvExpiredProducts.Size = new System.Drawing.Size(684, 254);
             this.dgvExpiredProducts.TabIndex = 0;
             this.dgvExpiredProducts.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvExpiredProducts_CellContentClick);
             // 
@@ -55,7 +54,7 @@
             this.btnWriteOffSelected.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnWriteOffSelected.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnWriteOffSelected.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.btnWriteOffSelected.Location = new System.Drawing.Point(507, 429);
+            this.btnWriteOffSelected.Location = new System.Drawing.Point(370, 414);
             this.btnWriteOffSelected.Margin = new System.Windows.Forms.Padding(4);
             this.btnWriteOffSelected.Name = "btnWriteOffSelected";
             this.btnWriteOffSelected.Size = new System.Drawing.Size(182, 45);
@@ -68,7 +67,7 @@
             // 
             this.btnRefresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefresh.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnRefresh.Location = new System.Drawing.Point(766, 438);
+            this.btnRefresh.Location = new System.Drawing.Point(637, 414);
             this.btnRefresh.Margin = new System.Windows.Forms.Padding(4);
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(129, 45);
@@ -76,17 +75,6 @@
             this.btnRefresh.Text = "Обновить";
             this.btnRefresh.UseVisualStyleBackColor = true;
             this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
-            // 
-            // lblSelectedInfo
-            // 
-            this.lblSelectedInfo.AutoSize = true;
-            this.lblSelectedInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lblSelectedInfo.Location = new System.Drawing.Point(78, 414);
-            this.lblSelectedInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblSelectedInfo.Name = "lblSelectedInfo";
-            this.lblSelectedInfo.Size = new System.Drawing.Size(343, 20);
-            this.lblSelectedInfo.TabIndex = 3;
-            this.lblSelectedInfo.Text = "Выбрано товаров: 0, сумма убытка: 0.00 руб.";
             // 
             // lblTitle
             // 
@@ -96,17 +84,16 @@
             this.lblTitle.Location = new System.Drawing.Point(78, 59);
             this.lblTitle.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(375, 25);
+            this.lblTitle.Size = new System.Drawing.Size(318, 20);
             this.lblTitle.TabIndex = 4;
             this.lblTitle.Text = "Списание просроченных товаров";
             // 
             // FormWriteOffExpired
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(980, 562);
+            this.ClientSize = new System.Drawing.Size(893, 562);
             this.Controls.Add(this.lblTitle);
-            this.Controls.Add(this.lblSelectedInfo);
             this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.btnWriteOffSelected);
             this.Controls.Add(this.dgvExpiredProducts);
@@ -125,7 +112,6 @@
         private System.Windows.Forms.DataGridView dgvExpiredProducts;
         private System.Windows.Forms.Button btnWriteOffSelected;
         private System.Windows.Forms.Button btnRefresh;
-        private System.Windows.Forms.Label lblSelectedInfo;
         private System.Windows.Forms.Label lblTitle;
     }
 }
