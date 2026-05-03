@@ -55,6 +55,11 @@ namespace WarehouseManagementSystem.Forms
         {
             this.Close();
         }
+
+        /// <summary>
+        /// Обработчик нажатия кнопки "Добавить товар".
+        /// Открывает окно выбора товара и добавляет его в таблицу поставки.
+        /// </summary>
         private void btnAddItem_Click(object sender, EventArgs e)
         {
             using (var selectForm = new FormChooseProduct())
@@ -84,24 +89,7 @@ namespace WarehouseManagementSystem.Forms
             }
         }
 
-        private DateTime? GetProductExpiryDate(int productId)
-        {
-            try
-            {
-                string sql = "SELECT ExpiryDate FROM Products WHERE Id = @id";
-                var param = new NpgsqlParameter("@id", productId);
-                var result = DatabaseHelper.ExecuteScalar(sql, new[] { param });
-
-                if (result == null || result == DBNull.Value)
-                    return null;
-
-                return Convert.ToDateTime(result);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
+      
         private void CreateItemsTable()
         {
             itemsTable = new DataTable();
@@ -123,6 +111,10 @@ namespace WarehouseManagementSystem.Forms
 
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки "Сохранить".
+        /// Сохраняет поставку в базу данных и увеличивает остатки.
+        /// </summary>
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (itemsTable.Rows.Count == 0)
@@ -253,6 +245,10 @@ namespace WarehouseManagementSystem.Forms
             return result != null && result != DBNull.Value ? Convert.ToDateTime(result) : (DateTime?)null;
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки "Импорт из файла".
+        /// Открывает диалог выбора файла и импортирует поставку.
+        /// </summary>
         private void btnImport_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -278,6 +274,10 @@ namespace WarehouseManagementSystem.Forms
             }
         }
 
+        /// <summary>
+        /// Импортирует поставку из CSV файла.
+        /// Формат: артикул;количество;цена
+        /// </summary>
         private void ImportFromCsv(string file)
         {
             string[] lines = File.ReadAllLines(file);
@@ -340,6 +340,10 @@ namespace WarehouseManagementSystem.Forms
             MessageBox.Show(string.Format(String.ImportCompleted, added, errors));
         }
 
+        /// <summary>
+        /// Импортирует поставку из Excel файла.
+        /// Формат: колонка A - артикул, B - количество, C - цена
+        /// </summary>
         private void ImportFromExcel(string file)
         {
             using (var package = new ExcelPackage(new FileInfo(file)))

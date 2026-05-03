@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using WarehouseManagementSystem.Helpers;
 using WarehouseManagementSystem.Models;
+using Microsoft.VisualBasic;
 
 namespace WarehouseManagementSystem.Forms
 {
@@ -151,35 +152,190 @@ namespace WarehouseManagementSystem.Forms
         {
             if (dgvStock.CurrentRow == null)
             {
-                MessageBox.Show(String.SelectProductFromStock);
+                MessageBox.Show("Выберите товар из списка остатков");
                 return;
             }
 
             var productId = Convert.ToInt32(dgvStock.CurrentRow.Cells["Id"].Value);
             var article = dgvStock.CurrentRow.Cells["Article"].Value.ToString();
             var name = dgvStock.CurrentRow.Cells["Name"].Value.ToString();
-            var stockQuantity = Convert.ToDecimal(dgvStock.CurrentRow.Cells["StockQuantity"].Value);
+            var totalStock = Convert.ToDecimal(dgvStock.CurrentRow.Cells["StockQuantity"].Value);
 
-            var selectForm = new FormSelectProduct(productId, article, name, stockQuantity, 0);
-            if (selectForm.ShowDialog() == DialogResult.OK)
+            // Получаем все партии товара
+            DataTable batches = GetProductBatches(productId);
+
+            // Считаем количество в каждой категории
+            decimal expiredQty = 0;
+            decimal nearExpiryQty = 0;
+            decimal freshQty = 0;
+            int discountDays = GetDiscountDays();
+            int discountPercent = GetDiscountPercent();
+            int markupPercent = GetMarkupPercent();
+            decimal purchasePrice = GetProductPrice(productId);
+
+            foreach (DataRow batch in batches.Rows)
             {
-                var selected = selectForm.SelectedProduct;
-
-                var existing = _cartTable.Select($"ProductId = {selected.ProductId}");
-                if (existing.Length > 0)
+                DateTime? expiryDate = null;
+                if (batch["ExpiryDate"] != DBNull.Value)
                 {
-                    MessageBox.Show(String.ProductAlreadyInShipment);
-                    return;
+                    expiryDate = Convert.ToDateTime(batch["ExpiryDate"]);
                 }
 
-                var purchasePrice = GetProductPrice(selected.ProductId);
-                int markupPercent = GetMarkupPercent();
-                var salePrice = purchasePrice * (1 + markupPercent / 100m);
-                _cartTable.Rows.Add(selected.ProductId, selected.Article, selected.Name, selected.Quantity, salePrice);
-                MessageBox.Show(string.Format(String.ProductAddedToShipment, selected.Name, selected.Quantity));
+                decimal qty = Convert.ToDecimal(batch["Quantity"]);
 
-
+                if (expiryDate.HasValue)
+                {
+                    int daysLeft = (expiryDate.Value - DateTime.Now).Days;
+                    if (daysLeft < 0)
+                    {
+                        expiredQty += qty;  // Просроченные товары
+                    }
+                    else if (daysLeft <= discountDays && daysLeft >= 0)
+                    {
+                        nearExpiryQty += qty;  // С истекающим сроком (скидка)
+                    }
+                    else
+                    {
+                        freshQty += qty;  // Свежие (без скидки)
+                    }
+                }
+                else
+                {
+                    freshQty += qty;  // Срок не указан - свежие
+                }
             }
+
+            // Проверка: если есть просроченные товары, отгрузка запрещена
+            if (expiredQty > 0)
+            {
+                MessageBox.Show($"Товар '{name}' содержит просроченные партии ({expiredQty} шт.)!\n" +
+                                "Отгрузка просроченных товаров невозможна.\n" +
+                                "Используйте форму 'Списание просрочки' (доступна администратору).",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Если нет свежих и нет товаров с истекающим сроком
+            if (nearExpiryQty == 0 && freshQty == 0)
+            {
+                MessageBox.Show($"Нет доступных партий для товара '{name}'");
+                return;
+            }
+
+            // Информация о наличии
+            string infoMsg = $"Товар: {name}\n";
+            infoMsg += $"Всего на складе: {totalStock} шт.\n";
+            if (nearExpiryQty > 0)
+            {
+                infoMsg += $"С истекающим сроком: {nearExpiryQty} шт. (скидка {discountPercent}%)\n";
+            }
+            if (freshQty > 0)
+            {
+                infoMsg += $"Свежих: {freshQty} шт.\n";
+            }
+            infoMsg += $"Введите количество для отгрузки:";
+
+            // Простое окно ввода количества
+            Form inputForm = new Form();
+            inputForm.Text = "Отгрузка товара";
+            inputForm.Width = 300;
+            inputForm.Height = 220;
+            inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            inputForm.StartPosition = FormStartPosition.CenterParent;
+            inputForm.MaximizeBox = false;
+            inputForm.MinimizeBox = false;
+
+            Label lblInfo = new Label();
+            lblInfo.Text = infoMsg;
+            lblInfo.Location = new System.Drawing.Point(10, 10);
+            lblInfo.Size = new System.Drawing.Size(260, 110);
+            lblInfo.Font = new Font("Arial", 9);
+
+            Label lblQty = new Label();
+            lblQty.Text = "Количество:";
+            lblQty.Location = new System.Drawing.Point(10, 130);
+            lblQty.Size = new System.Drawing.Size(80, 25);
+
+            TextBox txtQty = new TextBox();
+            txtQty.Text = "1";
+            txtQty.Location = new System.Drawing.Point(90, 130);
+            txtQty.Size = new System.Drawing.Size(100, 25);
+
+            Button btnOk = new Button();
+            btnOk.Text = "OK";
+            btnOk.Location = new System.Drawing.Point(200, 128);
+            btnOk.Size = new System.Drawing.Size(70, 30);
+            btnOk.DialogResult = DialogResult.OK;
+
+            Button btnCancel = new Button();
+            btnCancel.Text = "Отмена";
+            btnCancel.Location = new System.Drawing.Point(200, 160);
+            btnCancel.Size = new System.Drawing.Size(70, 30);
+            btnCancel.DialogResult = DialogResult.Cancel;
+
+            inputForm.Controls.Add(lblInfo);
+            inputForm.Controls.Add(lblQty);
+            inputForm.Controls.Add(txtQty);
+            inputForm.Controls.Add(btnOk);
+            inputForm.Controls.Add(btnCancel);
+
+            if (inputForm.ShowDialog() != DialogResult.OK) return;
+
+            if (!decimal.TryParse(txtQty.Text, out decimal quantity) || quantity <= 0)
+            {
+                MessageBox.Show("Введите корректное количество");
+                return;
+            }
+
+            if (quantity > totalStock)
+            {
+                MessageBox.Show($"Недостаточно товара. Доступно: {totalStock} шт.");
+                return;
+            }
+
+            decimal takeFromNearExpiry = Math.Min(quantity, nearExpiryQty);
+            decimal takeFromFresh = quantity - takeFromNearExpiry;
+
+            decimal priceWithMarkup = purchasePrice * (1 + markupPercent / 100m);
+            decimal priceWithDiscount = priceWithMarkup * (1 - discountPercent / 100m);
+
+            if (takeFromNearExpiry > 0)
+            {
+                _cartTable.Rows.Add(productId, article, name + " (скидка)", takeFromNearExpiry, priceWithDiscount);
+            }
+            if (takeFromFresh > 0)
+            {
+                _cartTable.Rows.Add(productId, article, name, takeFromFresh, priceWithMarkup);
+            }
+
+            string resultMsg = $"Добавлено: {name}\n";
+            resultMsg += $"Всего: {quantity} шт.\n";
+            if (takeFromNearExpiry > 0)
+            {
+                resultMsg += $"Со скидкой: {takeFromNearExpiry} шт. x {priceWithDiscount:N2} = {takeFromNearExpiry * priceWithDiscount:N2} руб.\n";
+            }
+            if (takeFromFresh > 0)
+            {
+                resultMsg += $"Без скидки: {takeFromFresh} шт. x {priceWithMarkup:N2} = {takeFromFresh * priceWithMarkup:N2} руб.\n";
+            }
+            resultMsg += $"Итого: {(takeFromNearExpiry * priceWithDiscount) + (takeFromFresh * priceWithMarkup):N2} руб.";
+
+            MessageBox.Show(resultMsg, "Добавлено в отгрузку", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private DataTable GetProductBatches(int productId)
+        {
+            string sql = @"
+        SELECT 
+            Id,
+            Quantity,
+            ExpiryDate
+        FROM StockBatches 
+        WHERE ProductId = @pid AND Quantity > 0
+        ORDER BY ExpiryDate ASC NULLS LAST";
+
+            var param = new NpgsqlParameter("@pid", productId);
+            return DatabaseHelper.ExecuteQuery(sql, new[] { param });
         }
 
         private decimal GetProductPrice(int productId)
@@ -189,6 +345,7 @@ namespace WarehouseManagementSystem.Forms
             var result = DatabaseHelper.ExecuteScalar(sql, new[] { param });
             return result != null ? Convert.ToDecimal(result) : 0;
         }
+
 
         private void btnRemoveItem_Click(object sender, EventArgs e)
         {
@@ -381,6 +538,49 @@ namespace WarehouseManagementSystem.Forms
             catch
             {
                 return 20;
+            }
+
+        }
+        // Получить срок годности партии
+        private DateTime? GetBatchExpiryDate(int productId)
+        {
+            string sql = @"
+        SELECT ExpiryDate FROM StockBatches 
+        WHERE ProductId = @pid AND Quantity > 0
+        ORDER BY ExpiryDate ASC NULLS LAST
+        LIMIT 1";
+            var param = new NpgsqlParameter("@pid", productId);
+            var result = DatabaseHelper.ExecuteScalar(sql, new[] { param });
+            return result != null && result != DBNull.Value ? Convert.ToDateTime(result) : (DateTime?)null;
+        }
+
+        // Получить процент скидки из настроек
+        private int GetDiscountPercent()
+        {
+            try
+            {
+                string sql = "SELECT SettingValue FROM AppSettings WHERE SettingKey = 'DiscountPercentage'";
+                var result = DatabaseHelper.ExecuteScalar(sql);
+                return result != null ? Convert.ToInt32(result) : 20;
+            }
+            catch
+            {
+                return 20;
+            }
+        }
+
+        // Получить количество дней для скидки
+        private int GetDiscountDays()
+        {
+            try
+            {
+                string sql = "SELECT SettingValue FROM AppSettings WHERE SettingKey = 'DiscountDaysBeforeExpiry'";
+                var result = DatabaseHelper.ExecuteScalar(sql);
+                return result != null ? Convert.ToInt32(result) : 30;
+            }
+            catch
+            {
+                return 30;
             }
         }
 
